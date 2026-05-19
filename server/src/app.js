@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
+import express from 'express';
+import cors from 'cors';
+import helment from 'helmet';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 
 const app = express()
 
@@ -50,4 +50,4 @@ app.use((err, req, res, next) => {
     });
 });
 
-module.exports = app;
+export default app;
