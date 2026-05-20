@@ -74,17 +74,14 @@ const elementSchema = new mongoose.Schema({
         type: Number,
         min: 12,
         max: 64,
-        default: 12,
     },
 
     fontFamily: {
         type: String,
-        default: 'Arial'
     },
 
     color: {
         type: String,
-        default: '#000000'
     }
 }, {
     _id: true

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import elementSchema from './Element'
+import elementSchema from './Element.js'
 
 const postcardSchema = new mongoose.Schema({
     title: {
@@ -71,10 +71,8 @@ const postcardSchema = new mongoose.Schema({
     timestamps: true
 });
 
-postcardSchema.pre('save', async function (next) {
-    if (!this.isModified('title')) {
-        return next();
-    }
+postcardSchema.pre('save', async function () {
+    if (!this.isModified('title')) return
 
     let slug = this.title
         .toLowerCase()
@@ -92,14 +90,12 @@ postcardSchema.pre('save', async function (next) {
     }
 
     this.slug = slug;
-    next();
 });
 
-postcardSchema.pre('save', function(next) {
+postcardSchema.pre('save', function() {
     if (this.isModified('status') && this.status === 'sent' && !this.sentAt) {
         this.sentAt = new Date();
     }
-    next();
 });
 
 const Postcard = mongoose.model('Postcard', postcardSchema);

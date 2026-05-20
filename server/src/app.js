@@ -1,8 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import helment from 'helmet';
+import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import postRoutes from './routes/postcard.routes.js';
 
 const app = express()
 
@@ -29,6 +30,8 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
 }
 
+app.use('/api/postcards', postRoutes);
+
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
 });
@@ -40,13 +43,34 @@ app.use((req, res, next) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
+    let statusCode = err.statusCode || 500;
+    let message = err.message || 'Internal Server Error';
+
+    // invalid ObjectId format 
+    if (err.name === 'CastError') {
+        statusCode = 400;
+        message: `Invalid ${err.path}: ${err.value}`;
+    }
+
+    // when unique contraint is violated (duplicates)
+    if (err.code === 11000) {
+        statusCode = 400;
+        const field = Object.keys(err.keyValue)[0];
+        message = `${field} already exists`
+    }
+
+    // schema validation error
+    if (err.name === 'ValidationError') {
+        statusCode = 400;
+        message = Object.values(err.errors)
+            .map((e) => e.message)
+            .join(', ')
+    }
 
     res.status(statusCode).json({
         success: false,
         message,
-        ...(proccess.env.NODE_ENV === 'development' && { stack: err.stack}),
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack}),
     });
 });
 
