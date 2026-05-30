@@ -1,0 +1,16 @@
+.letter-remove {
+    animation: letter-remove 2.5s forwards;
+}
+.letter-return {
+    animation: letter-return 1.5s forwards;
+}
+
+@keyframes letter-remove {
+    50% { top: -450px; }
+    100% { top: 8px; z-index: 40; }
+}
+@keyframes letter-return {
+    0% { top: 8px; z-index: 40; }
+    50% { top: -450px;}
+    100% { z-index: 10; }
+}
