@@ -137,7 +137,7 @@ export default function Postcard({ cardData }) {
 
                 {/* Buttons */}
                 <div className='relative top-[85px] flex flex-row gap-4'>
-                    <button onClick={() => { setIsFlipped(prev => !prev); setIsOpen(false) }} className='bg-white p-4 w-32'>Flip</button>
+                    <button onClick={() => { setIsFlipped(prev => !prev); setIsOpen(false); setLetterState('idle') }} className='bg-white p-4 w-32'>Flip</button>
                     { isFlipped &&
                         <button onClick={() => handleEnvelopeOpen()} className='bg-white p-4 w-[100px]'>{letterState === "removing" ? 'Close' : 'Open'}</button>
                     }
