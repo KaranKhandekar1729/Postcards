@@ -2,8 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import dotenv from 'dotenv'; 
 import cookieParser from 'cookie-parser';
-import postRoutes from './routes/postcard.routes.js';
+import postRouter from './routes/postcard.routes.js';
+import uploadRouter from './routes/cloudinary.router.js';
+
+dotenv.config();
 
 const app = express()
 
@@ -30,7 +34,8 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
 }
 
-app.use('/api/postcards', postRoutes);
+app.use('/api/postcards', postRouter);
+app.use('/api/upload', uploadRouter);
 
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });

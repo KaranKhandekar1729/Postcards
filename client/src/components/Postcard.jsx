@@ -123,7 +123,7 @@ export default function Postcard({ cardData }) {
                         {/* Inner gradient for depth */}
                         <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/10 opacity-40 pointer-events-none" />
                         {/* Envelope Front */}
-                        <div className="h-full w-full absolute bottom-0 z-20 [clip-path:polygon(20px_-6px_3px_rgba(50,50,0,0.1))]">
+                        <div className="h-full w-full absolute bottom-0 z-20">
                             <div className="[clip-path:polygon(50%_50%,100%_0,100%_100%,0_100%,0_0)] bg-white w-full h-full before:content-[''] before:absolute before:bg-[#f8f6f7] before:w-2/4 before:h-full before:[clip-path:polygon(100%_50%,0_0,0_100%)] after:content-[''] after:bg-[#f8f6f7] after:absolute after:w-2/4 after:h-full after:right-0 after:[clip-path:polygon(0%_50%,100%_0,100%_100%)]"></div>
                         </div>
 

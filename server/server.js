@@ -1,10 +1,8 @@
-import dotenv from 'dotenv'
 import app from './src/app.js';
 import connectDB from './src/config/db.js';
 import User from './src/models/User.js';
 import Postcard from './src/models/Postcard.js';
 
-dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
