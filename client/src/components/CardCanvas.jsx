@@ -1,81 +1,70 @@
-import { useState, useEffect, useRef } from "react"
-import { Canvas, Text, FabricImage } from 'fabric';
-import Sidebar from "./Sidebar";
+import { useState, useEffect, useRef } from "react";
+import { Canvas } from "fabric";
 
-
-export default function CardCanvas() {
+export default function CardCanvas({ fabricRef }) {
     const [isFlipped, setIsFlipped] = useState(false)
-    const [isUploading, setIsUploading] = useState(false);
     const canvasRef = useRef(null)
-    const fabricRef = useRef(null)
-
+    const envelopeRef = useRef(null)
 
     useEffect(() => {
+        if (fabricRef?.current) return
+
+        const envelope = envelopeRef?.current;
+        const width = envelope.offsetWidth;
+        const height = envelope.offsetHeight;
+
+        
         const canvas = new Canvas(canvasRef.current, {
-            width: 700,
-            height: 360,
+            width: width,
+            height: height,
             backgroundColor: '#fff'
         });
-        canvas.renderAll()
-        // canvas.add(new Rect({ left: 50, top: 50, width: 100, height: 100, fill: 'red' }));
+        canvas.renderAll();
         fabricRef.current = canvas;
+        
+        const observer = new ResizeObserver(() => {
+            const w = envelope.offsetWidth;
+            const h = envelope.offsetHeight;
+
+            const scaleX = w / canvas.width;
+            const scaleY = h / canvas.height;
+
+            canvas.setDimensions({ width: w, height: h });
+
+            canvas.getObjects().forEach(obj => {
+                obj.set({
+                    left: obj.left * scaleX,
+                    top: obj.top * scaleY,
+                    scaleX: obj.scaleX * scaleX,
+                    scaleY: obj.scaleY * scaleY,
+                });
+                obj.setCoords();
+            });
+
+
+            canvas.renderAll();
+        });
+        observer.observe(envelope);
 
         return () => {
+            observer.disconnect();
             canvas.dispose();
             fabricRef.current = null
         }
-    }, [])
-
-    const uploadToCloudinary = async (file) => {
-        if (!file) return
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const res = await fetch('http://localhost:3000/api/upload', {
-            method: 'POST',
-            body: formData,
-        });
-
-        const data =  await res.json()
-        return data.url;
-    }
-    
-    const addText = () => {
-        const text =  new Text('Hello', {
-            fontFamily: 'Arial',
-            fill: '#000',
-        })
-
-        fabricRef.current?.add(text)
-        fabricRef.current?.centerObject(text)
-    }
-
-    const addImage = async (e) => {
-        const file = e.target.files[0]
-        setIsUploading(true)
-        const url = await uploadToCloudinary(file)
-        setIsUploading(false)
-        const img =  await FabricImage.fromURL(url, {
-            crossOrigin: 'anonymous',
-        })
-
-        img.scaleToWidth(150)
-        fabricRef.current?.add(img)
-        fabricRef.current?.centerObject(img);
-    }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) 
 
     return (
         <>
-            <div className="perspective-distant w-screen h-screen flex flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
+            <div className="perspective-distant h-screen flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
                 <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
-
-                <Sidebar onAddText={addText} onAddImage={addImage} isUploading={isUploading}/>
 
                 {/* Envelope */}
                 <div 
+                    ref={envelopeRef}
                     className={`group relative
-                    top-20 bg-white w-175 h-90 
-                    shadow-2xl drop-shadow-black  transition-transform 
+                    top-20 bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px] 
+                    shadow-2xl drop-shadow-black transition-transform 
                     transform-3d duration-1000 
                     ${isFlipped ? 'rotate-y-180' : ''} origin-center`}>
 
@@ -106,8 +95,8 @@ export default function CardCanvas() {
                         <div
                             className={`absolute bg-[#fdf6d3] 
                                 shadow-lg border border-[#ccc] 
-                                w-11/12 h-3/4 top-18
-                                left-8 perspective-distant 
+                                w-11/12 h-3/4 top-8 md:top-15
+                                left-4 xs:left-5 sm:left-6 md:left-8 perspective-distant 
                                 before:content-[''] before:bg-[#fdf6d3] 
                                 before:border before:border-[#ccc] 
                                 before:absolute before:h-3/4 before:w-full 
@@ -132,10 +121,10 @@ export default function CardCanvas() {
 
                     </div>
                 </div>
-                <div className="relative top-30 flex gap-3">
+                <div className="relative top-[85px] flex gap-3">
                     <button
                         onClick={() => { setIsFlipped(prev => !prev) }} 
-                        className='bg-white p-4 w-32'
+                        className='bg-white p-4 w-[100px] lg:w-32'
                     >
                         Flip
                     </button>

@@ -1,8 +1,8 @@
 export default function Sidebar ({ onAddText, onAddImage, isUploading }) {
     return (
         <>
-            <div className="w-15 absolute left-0 h-full bg-yellow-950 border-r-2 border-y-yellow-950">
-                <div className="flex flex-col gap-4 flex-1 justify-center items-center">
+            <div className="w-full h-13 lg:w-15 lg:h-full bg-yellow-950 border-t-2 border-t-yellow-900 lg:border-r-2 lg:border-t-0 lg:border-r-yellow-900">
+                <div className="flex flex-row lg:flex-col gap-12 lg:gap-4 flex-1 justify-center items-center">
                     <button 
                         onClick={() => onAddText()}
                         className="rounded-md cursor-pointer text-[2rem] font-bold text-white"

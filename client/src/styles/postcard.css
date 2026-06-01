@@ -6,11 +6,11 @@
 }
 
 @keyframes letter-remove {
-    50% { top: -450px; }
+    50% { top: -350px; }
     100% { top: 8px; z-index: 40; }
 }
 @keyframes letter-return {
     0% { top: 8px; z-index: 40; }
-    50% { top: -450px;}
+    50% { top: -350px;}
     100% { z-index: 10; }
 }

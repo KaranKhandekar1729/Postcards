@@ -11,14 +11,18 @@ export default function Postcard({ cardData }) {
     const handleEnvelopeOpen = async () => { 
         if (!isFlipped) return
 
-        if (!isOpen) {
+        if (!isOpen && (letterState === 'idle')) {
             // OPEN flap
             setIsOpen(true) 
             await sleep(1200)
     
             setLetterState('removing')
+            await sleep(600)
+            setIsOpen(false)
         } else {
             // CLOSE flap
+            setIsOpen(true)
+            await sleep(1200)
             setLetterState('returning')
             await sleep(1200)
             setIsOpen(false)
@@ -29,13 +33,14 @@ export default function Postcard({ cardData }) {
 
     return (
         <>
-            <div className='perspective-distant bg-red-950 w-screen h-screen flex flex-col gap-3 justify-center items-center'>
+            <div className="perspective-distant h-screen flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
+                <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
 
                 {/* Envelope */}
                 <div 
                     className={`group relative 
-                    top-20 bg-yellow-50 w-175 h-90 
-                    shadow-sm shadow-white transition-transform 
+                    top-20 bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px]  
+                    shadow-2xl drop-shadow-black transition-transform 
                     transform-3d duration-1000 
                     ${isFlipped ? 'rotate-y-180' : ''} origin-center`}>
 
@@ -98,10 +103,11 @@ export default function Postcard({ cardData }) {
 
                         {/* Letter */}
                         <div
+                            
                             className={`absolute bg-[#fdf6d3] 
                                 shadow-lg border border-[#ccc] 
-                                w-11/12 h-3/4 top-18 z-10 
-                                left-8 perspective-distant 
+                                w-11/12 h-3/4 top-8 md:top-15 z-10
+                                left-4 xs:left-5 sm:left-6 md:left-8 perspective-distant 
                                 before:content-[''] before:bg-[#fdf6d3] 
                                 before:border before:border-[#ccc] 
                                 before:absolute before:h-3/4 before:w-full 
@@ -115,8 +121,7 @@ export default function Postcard({ cardData }) {
                                 transition-all
                                 duration-2000
                                 ${ letterState === 'removing' ? 'letter-remove': ''} 
-                                ${ letterState === 'returning' ? 'letter-return': ''}
-                                ${ letterState === 'front' ? '-translate-y-20 z-40' : 'z-10'} 
+                                ${ letterState === 'returning' ? 'letter-return': ''} 
                             `}>
                         </div>
                         
@@ -131,9 +136,11 @@ export default function Postcard({ cardData }) {
                 </div>
 
                 {/* Buttons */}
-                <div className='relative top-30 flex flex-row gap-4'>
+                <div className='relative top-[85px] flex flex-row gap-4'>
                     <button onClick={() => { setIsFlipped(prev => !prev); setIsOpen(false) }} className='bg-white p-4 w-32'>Flip</button>
-                    <button onClick={handleEnvelopeOpen} className='bg-white p-4 w-32'>{isOpen ? 'Close' : 'Open'}</button>
+                    { isFlipped &&
+                        <button onClick={() => handleEnvelopeOpen()} className='bg-white p-4 w-[100px]'>{letterState === "removing" ? 'Close' : 'Open'}</button>
+                    }
                 </div>
             </div>
         </>
