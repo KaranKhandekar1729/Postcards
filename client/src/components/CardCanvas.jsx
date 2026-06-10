@@ -104,11 +104,18 @@ export default function CardCanvas({ fabricRef }) {
     // DELETE OBJECT FUNCTION
     const deleteSelected = () => {
         const canvas = fabricRef.current;
-        const obj = canvas?.getActiveObject();
+        const activeObject = canvas?.getActiveObject();
+        if (!activeObject) return;
 
-        if (!obj) return;
+        // Delete selected object group
+        if (activeObject.type === 'activeselection') {
+            const selectedObj = canvas.getActiveObject()
+            selectedObj.forEachObject((obj) => canvas.remove(obj))
+            canvas.discardActiveObject()
+        } else {
+            canvas.remove(activeObject)
+        }
 
-        canvas.remove(obj);
         canvas.renderAll();
     };
 
