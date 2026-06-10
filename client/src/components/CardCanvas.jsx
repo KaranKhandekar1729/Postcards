@@ -11,6 +11,7 @@ export default function CardCanvas({ fabricRef }) {
         y: 0,
         visible: false,
     });
+    const [showLayerOptions, setShowLayerOptions] = useState(false)
 
     useEffect(() => {
         if (fabricRef?.current) return
@@ -155,16 +156,17 @@ export default function CardCanvas({ fabricRef }) {
         canvas.requestRenderAll();
     }
 
-    const bringForward = () => {
+    const setLayerPosition = (position) => {
         const canvas = fabricRef.current;
         const obj = canvas?.getActiveObject();
         console.log(obj, canvas)
 
         if (!obj) return;
 
-        canvas?.bringObjectToFront(obj);
+        position === 'front' ? canvas?.bringObjectToFront(obj) : canvas?.sendObjectToBack()
         canvas.renderAll();
     };
+
 
     return (
         <>
@@ -210,11 +212,17 @@ export default function CardCanvas({ fabricRef }) {
                                 </button>
 
                                 <button
-                                    onClick={bringForward}
-                                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                                    onClick={() => setShowLayerOptions((prev) => !prev)}
+                                    className="relative px-2 py-1 hover:bg-gray-100 rounded"
                                 >
                                     <Layers size="20" />
                                 </button>
+                                { showLayerOptions && (
+                                    <div className="absolute top-12 right-0 p-1 bg-white flex flex-col gap-1 shadow-md rounded-lg">
+                                        <div onClick={() => setLayerPosition('front')} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Bring to Front</div>
+                                        <div onClick={() => setLayerPosition('back')} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Send to Back</div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
