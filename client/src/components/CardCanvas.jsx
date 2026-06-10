@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Canvas } from "fabric";
+import { Trash, Copy, Layers } from 'lucide-react'
 
 export default function CardCanvas({ fabricRef }) {
     const [isFlipped, setIsFlipped] = useState(false)
     const canvasRef = useRef(null)
     const envelopeRef = useRef(null)
+    const [toolbarPos, setToolbarPos] = useState({
+        x: 0,
+        y: 0,
+        visible: false,
+    });
 
     useEffect(() => {
         if (fabricRef?.current) return
@@ -13,7 +19,7 @@ export default function CardCanvas({ fabricRef }) {
         const width = envelope.offsetWidth;
         const height = envelope.offsetHeight;
 
-        
+
         const canvas = new Canvas(canvasRef.current, {
             width: width,
             height: height,
@@ -21,7 +27,48 @@ export default function CardCanvas({ fabricRef }) {
         });
         canvas.renderAll();
         fabricRef.current = canvas;
-        
+
+        const updateToolbar = () => {
+            const obj = canvas.getActiveObject();
+
+            if (!obj) {
+                setToolbarPos(prev => ({
+                    ...prev,
+                    visible: false,
+                }));
+                return;
+            }
+
+            obj.borderColor = "brown"
+            obj.cornerColor = "brown"
+            obj.cornerStyle = "circle"
+            obj.cornerStrokeColor = "brown"
+            obj.cornerSize = 8
+            obj.transparentCorners = false
+            obj.controls.mtr.visible = false
+
+            const rect = obj.getBoundingRect();
+
+            setToolbarPos({
+                visible: true,
+                x: rect.left + rect.width / 2,
+                y: rect.top - 80,
+            });
+        };
+
+        canvas.on("selection:created", updateToolbar);
+        canvas.on("selection:updated", updateToolbar);
+        canvas.on("selection:cleared", () => {
+            setToolbarPos(prev => ({
+                ...prev,
+                visible: false,
+            }));
+        });
+
+        canvas.on("object:moving", updateToolbar);
+        canvas.on("object:scaling", updateToolbar);
+        canvas.on("object:rotating", updateToolbar);
+
         const observer = new ResizeObserver(() => {
             const w = envelope.offsetWidth;
             const h = envelope.offsetHeight;
@@ -52,7 +99,65 @@ export default function CardCanvas({ fabricRef }) {
             fabricRef.current = null
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []) 
+    }, [])
+
+    // DELETE OBJECT FUNCTION
+    const deleteSelected = () => {
+        const canvas = fabricRef.current;
+        const obj = canvas?.getActiveObject();
+
+        if (!obj) return;
+
+        canvas.remove(obj);
+        canvas.renderAll();
+    };
+
+    // COPY-PASTE OBJECT FUNCTION
+    const duplicate = async () => {
+        const canvas = fabricRef.current;
+
+        const activeObject = canvas.getActiveObject()
+
+        if (!activeObject) return;
+
+        const clipboard = await activeObject.clone()
+        const clonedObj = await clipboard?.clone()
+
+        canvas.discardActiveObject();
+
+        clonedObj.set({
+            left: clonedObj.left + 20,
+            top: clonedObj.top + 20,
+            evented: true
+        });
+
+        if (clonedObj.type === 'activeselection') {
+            clonedObj.canvas = canvas;
+            clonedObj.forEachObject((obj) => {
+                canvas.add(obj)
+                clonedObj.setCoords();
+            })
+        } else {
+            canvas.add(clonedObj);
+        }
+
+        clipboard.top += 20;
+        clipboard.left += 20;
+
+        canvas.setActiveObject(clonedObj);
+        canvas.requestRenderAll();
+    }
+
+    const bringForward = () => {
+        const canvas = fabricRef.current;
+        const obj = canvas?.getActiveObject();
+        console.log(obj, canvas)
+
+        if (!obj) return;
+
+        canvas?.bringObjectToFront(obj);
+        canvas.renderAll();
+    };
 
     return (
         <>
@@ -60,7 +165,7 @@ export default function CardCanvas({ fabricRef }) {
                 <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
 
                 {/* Envelope */}
-                <div 
+                <div
                     ref={envelopeRef}
                     className={`group relative
                     top-20 bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px] 
@@ -74,11 +179,43 @@ export default function CardCanvas({ fabricRef }) {
                         className="absolute inset-0 backface-hidden shadow-inner flex items-center justify-center z-50"
                     >
                         <canvas ref={canvasRef} />
+                        {toolbarPos.visible && (
+                            <div
+                                className="absolute z-9999 bg-white rounded-xl shadow-lg border border-[#ccccccb7] px-3 py-2 flex gap-2"
+                                style={{
+                                    left: toolbarPos.x,
+                                    top: toolbarPos.y,
+                                    transform: "translateX(-50%)",
+                                }}
+                            >
+                                <button
+                                    onClick={duplicate}
+                                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                                >
+                                    <Copy size="20" />
+                                </button>
+
+                                <button
+                                    onClick={deleteSelected}
+                                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                                >
+                                    <Trash size="20" />
+                                </button>
+
+                                <button
+                                    onClick={bringForward}
+                                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                                >
+                                    <Layers size="20" />
+                                </button>
+                            </div>
+                        )}
+
                     </div>
 
                     {/* Front */}
                     <div className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
-                        
+
                         {/* Flap */}
                         <div
                             className={`drop-shadow-lg 
@@ -111,7 +248,7 @@ export default function CardCanvas({ fabricRef }) {
                                 duration-2000 z-10
                             `}>
                         </div>
-                        
+
                         {/* Inner gradient for depth */}
                         <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/10 opacity-40 pointer-events-none" />
                         {/* Envelope Front */}
@@ -123,12 +260,12 @@ export default function CardCanvas({ fabricRef }) {
                 </div>
                 <div className="relative top-[85px] flex gap-3">
                     <button
-                        onClick={() => { setIsFlipped(prev => !prev) }} 
+                        onClick={() => { setIsFlipped(prev => !prev) }}
                         className='bg-white p-4 w-[100px] lg:w-32'
                     >
                         Flip
                     </button>
-                    
+
                 </div>
             </div>
         </>
