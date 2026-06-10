@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Canvas } from "fabric";
-import { Trash, Copy, Layers } from 'lucide-react'
+import { Trash, Copy, Layers, Bold } from 'lucide-react'
 
 export default function CardCanvas({ fabricRef }) {
     const [isFlipped, setIsFlipped] = useState(false)
@@ -12,6 +12,18 @@ export default function CardCanvas({ fabricRef }) {
         visible: false,
     });
     const [showLayerOptions, setShowLayerOptions] = useState(false)
+    const [isTextObj, setIsTextObj] = useState(false)
+    const [selectedFont, setSelectedFont] = useState('Arial')
+    const [fontSize, setFontSize] = useState(40)
+
+    const fontOptions = [
+        { Arial: 'Arial' },
+        { TimesNewRoman: 'Times New Roman' },
+        { Roboto: 'Roboto' },
+        { ComicSans: 'Comic Sans' }
+    ]
+
+    const fontSizeOptions = [12, 14, 16, 18, 20, 24, 30, 36, 40, 48, 56, 64]
 
     useEffect(() => {
         if (fabricRef?.current) return
@@ -47,6 +59,9 @@ export default function CardCanvas({ fabricRef }) {
             obj.cornerSize = 8
             obj.transparentCorners = false
             obj.controls.mtr.visible = false
+
+            // Set state to true if object is of text type~
+            if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
 
             const rect = obj.getBoundingRect();
 
@@ -167,6 +182,50 @@ export default function CardCanvas({ fabricRef }) {
         canvas.renderAll();
     };
 
+    const updateFontFamily = (e) => {
+        const font = e.target.value
+        setSelectedFont(font)
+
+        const canvas = fabricRef.current;
+        const obj = canvas?.getActiveObject(); 
+        if (!obj) return;
+
+        obj.set({
+            fontFamily: font
+        })
+        
+        canvas.renderAll();
+    }
+
+    const updateFontWeight = () => {
+        const canvas = fabricRef.current;
+        const obj = canvas?.getActiveObject(); 
+        if (!obj) return;
+
+        obj.set({
+            fontWeight: 'Bold'
+        })
+        
+        canvas.renderAll();
+    }
+
+    const updateFontSize = (e) => {
+        const fontSize = e.target.value
+        setFontSize(fontSize);
+
+        const canvas = fabricRef.current;
+        const obj = canvas?.getActiveObject(); 
+        if (!obj) return;
+        
+        if (!fontSize) return
+
+        obj.set({
+            fontSize: fontSize
+        })
+        
+        canvas.renderAll();
+    }
+
 
     return (
         <>
@@ -190,13 +249,49 @@ export default function CardCanvas({ fabricRef }) {
                         <canvas ref={canvasRef} />
                         {toolbarPos.visible && (
                             <div
-                                className="absolute z-9999 bg-white rounded-xl shadow-lg border border-[#ccccccb7] px-3 py-2 flex gap-2"
+                                className="absolute z-9999 bg-white w-max rounded-xl shadow-lg border border-[#ccccccb7] px-3 py-2 flex gap-2"
                                 style={{
                                     left: toolbarPos.x,
                                     top: toolbarPos.y,
                                     transform: "translateX(-50%)",
                                 }}
                             >
+                                { isTextObj && (
+                                    <div className="flex flex-row gap-2">
+                                        <div className={`px-2 py-1 hover:bg-gray-100 rounded
+                                                ${isTextObj ? 'visible' : 'hidden'}`}
+                                        >
+                                            <select value={selectedFont} onChange={(e) => updateFontFamily(e)} name="font-family" id="font-family">
+                                                { fontOptions.map((fontOption, index) => {
+                                                    const [key, value] = Object.entries(fontOption)[0];
+                                                    return (
+                                                        <option 
+                                                            key={index}
+                                                            value={key}
+                                                            className="shadow-md border border-[#cccccc86] rounded-lg"
+                                                        >{value}</option>
+                                                    )}
+                                                )}
+                                            </select>
+                                        </div>
+                                        <div className={`px-2 py-1 hover:bg-gray-100 rounded
+                                            ${isTextObj ? 'visible' : 'hidden'}`}
+                                        >
+                                            <select value={fontSize} onChange={(e) => updateFontSize(e)} name="font-size" id="font-size">
+                                                {fontSizeOptions.map((fontSize, index) => (
+                                                    <option key={index} value={fontSize}>{fontSize}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <button
+                                            onClick={updateFontWeight}
+                                            className={`px-2 py-1 hover:bg-gray-100 rounded
+                                            ${isTextObj ? 'visible' : 'hidden'}`}
+                                        >
+                                            <Bold size="20"/>
+                                        </button>
+                                    </div>
+                                )}
                                 <button
                                     onClick={duplicate}
                                     className="px-2 py-1 hover:bg-gray-100 rounded"
