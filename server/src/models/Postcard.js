@@ -9,6 +9,16 @@ const postcardSchema = new mongoose.Schema({
         maxlength: [50, 'Title can be max 20 characters only']
     },
 
+    thumbnail: {
+        type: String,
+        required: true,
+    },
+
+    fabricData: {
+        type: Object,
+        required: true,
+    },
+
     slug: {
         type: String,
         unique: true,
@@ -26,29 +36,13 @@ const postcardSchema = new mongoose.Schema({
         envelopeColor: {
             type: String,
             default: '#ffffff'
-        },
-
-        elements: {
-            type: [elementSchema],
-            validate: {
-                validator: arr => arr.length <= 10,
-                message: 'Maximum 10 elements allowed'
-            }
-        } 
+        }
     },
     // Letter content/design
     letter: {
         backgroundColor: {
             type: String,
             default: '#fffaf0'
-        },
-
-        elements: {
-            type: [elementSchema],
-            validate: {
-                validator: arr => arr.length <= 30,
-                message: 'Maximum 30 elements allowed'
-            }
         }
     },
 

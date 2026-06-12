@@ -4,15 +4,10 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 // POST /api/postcards
 export const createPostcard = asyncHandler(async (req, res) => {
-    const { title, status, envelope, letter, scheduledFor } = req.body;
 
-    const postcard = await Post.create({
-        title, 
-        status,
-        envelope,
-        letter,
-        scheduledFor,
-        author: req.user._id,
+    const postcard = await Postcard.create({
+        ...req.body,
+        author: req.user._id
     });
 
     res.status(201).json({
@@ -24,6 +19,7 @@ export const createPostcard = asyncHandler(async (req, res) => {
 // GET /api/postcards
 export const getAllPostcards = asyncHandler(async (req, res) => {
     const filter = {
+        author: req.user._id,
         status: { $in: ['draft', 'sent', 'scheduled'] }
     };
 
@@ -61,7 +57,7 @@ export const getAllPostcards = asyncHandler(async (req, res) => {
 
 // GET /api/postcards/:slug
 export const getPostcard = asyncHandler(async (req, res) => {
-    const postcard = await Postcard.find({
+    const postcard = await Postcard.findOne({
         slug: req.params.slug,
     }).populate('author', 'username email');
 
@@ -77,21 +73,29 @@ export const getPostcard = asyncHandler(async (req, res) => {
 export const updatePostcard = asyncHandler(async (req, res) => {
     const postcard = await Postcard.findById(req.params.id);
 
-    if (!postcard) throw AppError('Postcard not found', 404);
+    if (!postcard) throw new AppError('Postcard not found', 404);
 
     const isAuthor = postcard.author.toString() === req.user._id.toString()
     if (!isAuthor) {
         throw new AppError('You are not allowed to update this postcard', 403)
     }
 
-    const allowedFields = ['title', 'status', 'envelope', 'letter', 'scheduledFor'];
+    const allowedFields = ['title', 'thumbnail', 'fabricData', 'status', 'envelope', 'letter', 'scheduledFor'];
+    const updates = {};
+
     allowedFields.forEach((field) => {
         if (req.body[field] !== undefined) {
-            postcard[field] = req.body[field];
+            updates[field] = req.body[field];
         }
     });
 
-    await post.save();
+    console.log('updates:', updates);
+    
+    await Postcard.findByIdAndUpdate(
+        req.params.id,
+        { $set: updates },
+        { returnDocument: 'after', runValidators: true }
+    );
 
     res.status(200).json({ success: true, data: postcard });
 });
@@ -102,12 +106,12 @@ export const deletePostcard = asyncHandler(async (req, res) => {
 
     if (!postcard) throw new AppError('Postcard not found', 404);
 
-    isAuthor = postcard.author.toString() === req.user._id.toString();
+    const isAuthor = postcard.author.toString() === req.user._id.toString();
     if (!isAuthor) {
         throw new AppError('You are not allowed to delete this postcard', 403);
     }
     
-    await post.deleteOne();
+    await postcard.deleteOne();
 
     res.status(204).json({ success:  true, data: null });
 })

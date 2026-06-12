@@ -6,14 +6,15 @@ import {
     updatePostcard,
     deletePostcard
 } from '../controllers/postcard.controller.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-router.get('/', getAllPostcards);
-router.get('/:slug', getPostcard);
+router.get('/', authenticate, getAllPostcards);
+router.get('/:slug', authenticate, getPostcard);
 
-router.post('/', createPostcard);
-router.patch('/:id', updatePostcard);
-router.delete('/:id', deletePostcard);
+router.post('/', authenticate, createPostcard);
+router.patch('/:id', authenticate, updatePostcard);
+router.delete('/:id', authenticate, deletePostcard);
 
 export default router;
