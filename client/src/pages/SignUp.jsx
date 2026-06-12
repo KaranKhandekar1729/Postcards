@@ -1,0 +1,104 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+export default function SignUp() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    const username = data.get('username');
+    const email = data.get('email');
+    const password = data.get('password');
+
+    setError('');
+    setLoading(true);
+    try {
+      await register(username, email, password);
+      navigate('/edit');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+
+        <div className="mb-8 text-center">
+          <h1 className="mt-3 text-xl font-semibold text-stone-800">Create an account</h1>
+          <p className="text-sm text-stone-400 mt-1">Start sending postcards</p>
+        </div>
+
+        {error && (
+          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-500">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-stone-600 mb-1.5">
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              placeholder="e.g. wanderer"
+              autoComplete="username"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-600 mb-1.5">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-600 mb-1.5">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="8+ characters"
+              autoComplete="new-password"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 bg-stone-800 text-white text-sm font-medium rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+          >
+            {loading ? 'Creating account...' : 'Create account'}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-stone-400 mt-6">
+          Already have an account?{' '}
+          <Link to="/login" className="text-stone-700 font-medium hover:underline">
+            Log in
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
