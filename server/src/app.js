@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import postRouter from './routes/postcard.routes.js';
 import uploadRouter from './routes/cloudinary.router.js';
+import authRouter from './routes/auth.routes.js';
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ app.use(cors({
 // will add the rate limiter later
 
 // convert req.body to json and limit payload size
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '20kb' }));
 
 // parse url encoded bodies
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
@@ -36,6 +37,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use('/api/postcards', postRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/auth', authRouter);
 
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
@@ -54,7 +56,7 @@ app.use((err, req, res, next) => {
     // invalid ObjectId format 
     if (err.name === 'CastError') {
         statusCode = 400;
-        message: `Invalid ${err.path}: ${err.value}`;
+        message = `Invalid ${err.path}: ${err.value}`;
     }
 
     // when unique contraint is violated (duplicates)
