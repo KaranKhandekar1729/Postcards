@@ -1,5 +1,4 @@
 import './index.css';
-import Postcard from './components/Postcard';
 import { BrowserRouter, Routes, Route }  from 'react-router-dom';
 import EditingView from './pages/EditingView';
 import { AuthProvider } from './context/AuthContext';
