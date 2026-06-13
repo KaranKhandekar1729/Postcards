@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Canvas } from "fabric";
 import { Trash, Copy, Layers, Bold } from 'lucide-react'
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import AuthModal from "./AuthModal";
 
 export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostcardId }) {
+    const { state } = useLocation();
     const navigate = useNavigate();
+    const { isAuthenticated, loading } = useAuth()
+    const [authOpen, setAuthOpen] = useState(false)
     const [isFlipped, setIsFlipped] = useState(false)
     const canvasRef = useRef(null)
     const envelopeRef = useRef(null)
@@ -81,6 +86,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                 ...prev,
                 visible: false,
             }));
+            setIsTextObj(false);
         });
 
         canvas.on("object:moving", updateToolbar);
@@ -180,7 +186,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
 
         if (!obj) return;
 
-        position === 'front' ? canvas?.bringObjectToFront(obj) : canvas?.sendObjectToBack()
+        position === 'front' ? canvas?.bringObjectToFront(obj) : canvas?.sendObjectToBack(obj)
         canvas.renderAll();
     };
 
@@ -248,59 +254,56 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         });
 
         const uploadData = await res.json();
-        const thumbnailUrl = uploadData.url;
 
         console.log('objects on canvas at save:', canvas.getObjects()); // add this
         console.log('canvas JSON:', canvas.toJSON());                    // and this
 
 
         const payload = {
-            title: 'New Postcard',
-            thumbnail: thumbnailUrl,
+            title: state?.title,
+            from: state?.from,
+            to: state?.to,
+            thumbnail: uploadData.url,
             fabricData: canvas.toJSON()
         }
 
         if (!postcardId) {
-            try {
-                const res = await fetch('http://localhost:3000/api/postcards', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(payload)
-                })
-                const data = await res.json();
-                console.log('Saved postcard: ', data);
-                setPostcardId(data.data._id)
-                navigate(`/postcard/edit/${data.data.slug}`, { replace: true });
-            } catch (error) {
-                console.error('Error saving postcard: ', error)
-            }
+            const res = await fetch('http://localhost:3000/api/postcards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            })
+            const data = await res.json();
+            setPostcardId(data.data._id)
+            navigate(`/postcard/edit/${data.data.slug}`, { replace: true });
         } else {
-            try {
-                console.log('PATCH with id:', postcardId); 
-                const res = await fetch(`http://localhost:3000/api/postcards/${postcardId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(payload)
-                })
-                const data = await res.json();
-                console.log('PATCH response:', data); 
-            } catch (error) {
-                console.error('Error updating postcard: ', error)
-            }
+            await fetch(`http://localhost:3000/api/postcards/${postcardId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            })
         }
     }
+
+    const handleSave = async () => {
+        if (loading) return
+
+        if (!isAuthenticated) {
+            setAuthOpen(true)
+            return
+        }
+
+        await savePostCard()
+    } 
     
     useEffect(() => {
-        console.log("fabricData:", fabricData);
-        console.log("canvas:", fabricRef.current);
         const canvas = fabricRef.current;
-
         if (!canvas || !fabricData) return;
 
         const loadCanvas = async () => {
@@ -469,13 +472,23 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                         Flip
                     </button>
                     <button 
-                        onClick={() => savePostCard()}
+                        onClick={() => handleSave()}
+                        disabled={loading}
                         className="cursor-pointer"
                     >
                         Save
                     </button>
                 </div>
             </div>
+
+            <AuthModal
+                open={authOpen}
+                onClose={() => setAuthOpen(false)}
+                onSuccess={async () => {
+                    setAuthOpen(false)
+                    await savePostCard()
+                }}
+            />
         </>
     )
 }

@@ -16,11 +16,7 @@ function App() {
           <Route path="/signup" element={ <SignUp /> } />
           <Route path="/login" element={<Login />}/>
           {/* <Route path="/p/:slug" element={ <Postcard cardData /> } /> */}
-          <Route path="/postcard/new" element={ 
-            <ProtectedRoute>
-              <EditingView /> 
-            </ProtectedRoute>
-          } />
+          <Route path="/postcard/new" element={ <EditingView /> } />
           <Route path="/postcard/edit/:slug" element={
             <ProtectedRoute>
               <EditingView />

@@ -26,6 +26,18 @@ const postcardSchema = new mongoose.Schema({
         trim: true,
     },
 
+    from: {
+        type: String,
+        trim: true,
+        required: true
+    },
+
+    to: {
+        type: String,
+        trim: true,
+        required: true
+    },
+
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

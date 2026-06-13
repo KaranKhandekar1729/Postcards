@@ -19,7 +19,7 @@ export default function Login () {
         setLoading(true);
         try {
         await login(email, password);
-        navigate('/postcard/edit');
+        navigate('/postcard/new');
         } catch (err) {
         setError(err.message);
         } finally {
@@ -64,7 +64,7 @@ export default function Login () {
               type="password"
               name="password"
               placeholder="8+ characters"
-              autoComplete="new-password"
+              autoComplete="current-password"
               className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
             />
           </div>
