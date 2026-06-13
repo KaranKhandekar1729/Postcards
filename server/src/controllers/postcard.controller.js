@@ -80,7 +80,7 @@ export const updatePostcard = asyncHandler(async (req, res) => {
         throw new AppError('You are not allowed to update this postcard', 403)
     }
 
-    const allowedFields = ['title', 'thumbnail', 'fabricData', 'status', 'envelope', 'letter', 'scheduledFor'];
+    const allowedFields = ['title', 'from', 'to', 'thumbnail', 'fabricData', 'status', 'envelope', 'letter', 'scheduledFor'];
     const updates = {};
 
     allowedFields.forEach((field) => {
