@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Canvas } from "fabric";
-import { Trash, Copy, Layers, Bold } from 'lucide-react'
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
+import Toolbar from "./Toolbar";
 
 export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostcardId }) {
     const { state } = useLocation();
@@ -24,10 +24,10 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
     const [fontSize, setFontSize] = useState(40)
 
     const fontOptions = [
-        { Arial: 'Arial' },
-        { TimesNewRoman: 'Times New Roman' },
-        { Roboto: 'Roboto' },
-        { ComicSans: 'Comic Sans' }
+        { label: 'Arial', value: 'Arial' },
+        { label: 'Times New Roman', value: 'TimesNewRoman' },
+        { label: 'Roboto', value: 'Roboto' },
+        { label: 'Comic Sans', value: 'ComicSans' }
     ]
 
     const fontSizeOptions = [12, 14, 16, 18, 20, 24, 30, 36, 40, 48, 56, 64]
@@ -80,13 +80,17 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         };
 
         canvas.on("selection:created", updateToolbar);
-        canvas.on("selection:updated", updateToolbar);
+        canvas.on("selection:updated", () => {
+            setShowLayerOptions(false)
+            updateToolbar()
+        });
         canvas.on("selection:cleared", () => {
             setToolbarPos(prev => ({
                 ...prev,
                 visible: false,
             }));
             setIsTextObj(false);
+            setShowLayerOptions(false)
         });
 
         canvas.on("object:moving", updateToolbar);
@@ -188,6 +192,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
 
         position === 'front' ? canvas?.bringObjectToFront(obj) : canvas?.sendObjectToBack(obj)
         canvas.renderAll();
+        setShowLayerOptions(false)
     };
 
     const updateFontFamily = (e) => {
@@ -195,25 +200,25 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         setSelectedFont(font)
 
         const canvas = fabricRef.current;
-        const obj = canvas?.getActiveObject(); 
+        const obj = canvas?.getActiveObject();
         if (!obj) return;
 
         obj.set({
             fontFamily: font
         })
-        
+
         canvas.renderAll();
     }
 
     const updateFontWeight = () => {
         const canvas = fabricRef.current;
-        const obj = canvas?.getActiveObject(); 
+        const obj = canvas?.getActiveObject();
         if (!obj) return;
 
         obj.set({
             fontWeight: 'Bold'
         })
-        
+
         canvas.renderAll();
     }
 
@@ -222,15 +227,15 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         setFontSize(fontSize);
 
         const canvas = fabricRef.current;
-        const obj = canvas?.getActiveObject(); 
+        const obj = canvas?.getActiveObject();
         if (!obj) return;
-        
+
         if (!fontSize) return
 
         obj.set({
             fontSize: fontSize
         })
-        
+
         canvas.renderAll();
     }
 
@@ -239,15 +244,15 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         if (!canvas) return
 
         const dataUrl = canvas.toDataURL({
-                            format: 'webp',
-                            quality: 0.7
-                        })
+            format: 'webp',
+            quality: 0.7
+        })
 
         const blob = await (await fetch(dataUrl)).blob();
 
         const formData = new FormData();
-        formData.append('file', blob, 'thumbnail.webp');               
-                        
+        formData.append('file', blob, 'thumbnail.webp');
+
         const res = await fetch('http://localhost:3000/api/upload', {
             method: 'POST',
             body: formData
@@ -300,8 +305,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         }
 
         await savePostCard()
-    } 
-    
+    }
+
     useEffect(() => {
         const canvas = fabricRef.current;
         if (!canvas || !fabricData) return;
@@ -344,77 +349,22 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                     >
                         <canvas ref={canvasRef} />
                         {toolbarPos.visible && (
-                            <div
-                                className="absolute z-9999 bg-white w-max rounded-xl shadow-lg border border-[#ccccccb7] px-3 py-2 flex gap-2"
-                                style={{
-                                    left: toolbarPos.x,
-                                    top: toolbarPos.y,
-                                    transform: "translateX(-50%)",
-                                }}
-                            >
-                                { isTextObj && (
-                                    <div className="flex flex-row gap-2">
-                                        <div className={`px-2 py-1 hover:bg-gray-100 rounded
-                                                ${isTextObj ? 'visible' : 'hidden'}`}
-                                        >
-                                            <select value={selectedFont} onChange={(e) => updateFontFamily(e)} name="font-family" id="font-family">
-                                                { fontOptions.map((fontOption, index) => {
-                                                    const [key, value] = Object.entries(fontOption)[0];
-                                                    return (
-                                                        <option 
-                                                            key={index}
-                                                            value={key}
-                                                            className="shadow-md border border-[#cccccc86] rounded-lg"
-                                                        >{value}</option>
-                                                    )}
-                                                )}
-                                            </select>
-                                        </div>
-                                        <div className={`px-2 py-1 hover:bg-gray-100 rounded
-                                            ${isTextObj ? 'visible' : 'hidden'}`}
-                                        >
-                                            <select value={fontSize} onChange={(e) => updateFontSize(e)} name="font-size" id="font-size">
-                                                {fontSizeOptions.map((fontSize, index) => (
-                                                    <option key={index} value={fontSize}>{fontSize}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <button
-                                            onClick={updateFontWeight}
-                                            className={`px-2 py-1 hover:bg-gray-100 rounded
-                                            ${isTextObj ? 'visible' : 'hidden'}`}
-                                        >
-                                            <Bold size="20"/>
-                                        </button>
-                                    </div>
-                                )}
-                                <button
-                                    onClick={duplicate}
-                                    className="px-2 py-1 hover:bg-gray-100 rounded"
-                                >
-                                    <Copy size="20" />
-                                </button>
-
-                                <button
-                                    onClick={deleteSelected}
-                                    className="px-2 py-1 hover:bg-gray-100 rounded"
-                                >
-                                    <Trash size="20" />
-                                </button>
-
-                                <button
-                                    onClick={() => setShowLayerOptions((prev) => !prev)}
-                                    className="relative px-2 py-1 hover:bg-gray-100 rounded"
-                                >
-                                    <Layers size="20" />
-                                </button>
-                                { showLayerOptions && (
-                                    <div className="absolute top-12 right-0 p-1 bg-white flex flex-col gap-1 shadow-md rounded-lg">
-                                        <div onClick={() => setLayerPosition('front')} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Bring to Front</div>
-                                        <div onClick={() => setLayerPosition('back')} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Send to Back</div>
-                                    </div>
-                                )}
-                            </div>
+                            <Toolbar
+                                toolbarPos={toolbarPos}
+                                isTextObj={isTextObj}
+                                updateFontFamily={updateFontFamily}
+                                updateFontSize={updateFontSize}
+                                updateFontWeight={updateFontWeight}
+                                fontOptions={fontOptions}
+                                selectedFont={selectedFont}
+                                fontSizeOptions={fontSizeOptions}
+                                fontSize={fontSize}
+                                duplicate={duplicate}
+                                deleteSelected={deleteSelected}
+                                showLayerOptions={showLayerOptions}
+                                setShowLayerOptions={setShowLayerOptions}
+                                setLayerPosition={setLayerPosition}
+                            />
                         )}
 
                     </div>
@@ -471,7 +421,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                     >
                         Flip
                     </button>
-                    <button 
+                    <button
                         onClick={() => handleSave()}
                         disabled={loading}
                         className="cursor-pointer"
