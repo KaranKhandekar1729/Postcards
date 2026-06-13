@@ -20,7 +20,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await register(username, email, password);
-      navigate('/edit');
+      navigate('/postcard/new');
     } catch (err) {
       setError(err.message);
     } finally {
