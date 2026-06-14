@@ -21,13 +21,17 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
     const [showLayerOptions, setShowLayerOptions] = useState(false)
     const [isTextObj, setIsTextObj] = useState(false)
     const [selectedFont, setSelectedFont] = useState('Arial')
+    const [fontDropdownOpen, setFontDropdownOpen] = useState(false)
     const [fontSize, setFontSize] = useState(40)
+    const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false)
 
     const fontOptions = [
-        { label: 'Arial', value: 'Arial' },
-        { label: 'Times New Roman', value: 'TimesNewRoman' },
-        { label: 'Roboto', value: 'Roboto' },
-        { label: 'Comic Sans', value: 'ComicSans' }
+        { label: 'Arial', value: 'Arial', url: null },
+        { label: 'Times New Roman', value: 'TimesNewRoman', url: null },
+        { label: 'Cedarville Cursive', value: 'CedarvilleCursive', googleFont: true },
+        { label: 'Instrument Serif', value: 'InstrumentSerif', googleFont: true },
+        { label: 'Shadows Into Light', value: 'ShadowsIntoLight', googleFont: true },
+        { label: 'Adversecase', value: 'Adversecase', url: 'https://res.cloudinary.com/docidcbkt/raw/upload/v1781364541/liypsjxnxyjxpmvrcur3.woff2' }
     ]
 
     const fontSizeOptions = [12, 14, 16, 18, 20, 24, 30, 36, 40, 48, 56, 64]
@@ -71,10 +75,11 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
             if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
 
             const rect = obj.getBoundingRect();
+            const canvasWidth = fabricRef?.current.width
 
             setToolbarPos({
                 visible: true,
-                x: rect.left + rect.width / 2,
+                x: rect.left + canvasWidth/4,
                 y: rect.top - 80,
             });
         };
@@ -82,6 +87,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         canvas.on("selection:created", updateToolbar);
         canvas.on("selection:updated", () => {
             setShowLayerOptions(false)
+            setFontDropdownOpen(false)
+            setFontSizeDropdownOpen(false)
             updateToolbar()
         });
         canvas.on("selection:cleared", () => {
@@ -91,6 +98,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
             }));
             setIsTextObj(false);
             setShowLayerOptions(false)
+            setFontDropdownOpen(false)
+            setFontSizeDropdownOpen(false)
         });
 
         canvas.on("object:moving", updateToolbar);
@@ -195,18 +204,43 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         setShowLayerOptions(false)
     };
 
-    const updateFontFamily = (e) => {
-        const font = e.target.value
-        setSelectedFont(font)
+    const preloadFonts = async () => {
+        const customFonts = fontOptions.filter(fontOption => fontOption.url)
+        await Promise.all(customFonts.map(async font => {
+            if (font.url) {
+                const fontFace = new FontFace(font.value, `url(${font.url})`)
+                await fontFace.load()
+                document.fonts.add(fontFace)
+            } else if (font.googleFont) {
+                await document.fonts.load(`16px "${font.label}"`)
+            }
+        }))
+    }
 
+    const updateFontFamily = async (fontValue) => {
+        const selected = fontOptions.find(f => f.value === fontValue)
+
+        if (!selected) return
+        
+        setSelectedFont(selected.value)
+
+        if (selected.url) {
+            const fontFace = new FontFace(selected.value, `url(${selected.url})`)
+            await fontFace.load()
+            document.fonts.add(fontFace)
+        } else if (selected.googleFont) {
+            try {
+                await document.fonts.load(`16px "${selected.label}"`) 
+            } catch {
+                console.warn(`Could not load font: ${selected.label}`)
+            }
+        }
+        
         const canvas = fabricRef.current;
         const obj = canvas?.getActiveObject();
         if (!obj) return;
 
-        obj.set({
-            fontFamily: font
-        })
-
+        obj.set({ fontFamily: selected.googleFont ? selected.label : selected.value })
         canvas.renderAll();
     }
 
@@ -222,20 +256,16 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         canvas.renderAll();
     }
 
-    const updateFontSize = (e) => {
-        const fontSize = e.target.value
-        setFontSize(fontSize);
+    const updateFontSize = (size) => {
+        setFontSize(size);
 
         const canvas = fabricRef.current;
         const obj = canvas?.getActiveObject();
         if (!obj) return;
 
-        if (!fontSize) return
+        if (!size) return
 
-        obj.set({
-            fontSize: fontSize
-        })
-
+        obj.set({ fontSize: size })
         canvas.renderAll();
     }
 
@@ -317,7 +347,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                     typeof fabricData === "string"
                         ? JSON.parse(fabricData)
                         : fabricData;
-
+                await preloadFonts()        
                 await canvas.loadFromJSON(json);
                 canvas.renderAll();
             } catch (err) {
@@ -339,7 +369,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                     className={`group relative
                     top-20 bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px] 
                     shadow-2xl drop-shadow-black transition-transform 
-                    transform-3d duration-1000 
+                    transform-3d duration-1000
                     ${isFlipped ? 'rotate-y-180' : ''} origin-center`}>
 
                     {/* Back */}
@@ -358,7 +388,11 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                                 fontOptions={fontOptions}
                                 selectedFont={selectedFont}
                                 fontSizeOptions={fontSizeOptions}
+                                fontDropdownOpen={fontDropdownOpen}
+                                setFontDropdownOpen={setFontDropdownOpen}
                                 fontSize={fontSize}
+                                fontSizeDropdownOpen={fontSizeDropdownOpen}
+                                setFontSizeDropdownOpen={setFontSizeDropdownOpen}
                                 duplicate={duplicate}
                                 deleteSelected={deleteSelected}
                                 showLayerOptions={showLayerOptions}

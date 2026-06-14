@@ -76,7 +76,7 @@ export default function EditingView() {
 
 
     return (
-        <div className="flex flex-col-reverse lg:flex-row w-screen h-screen">
+        <div className="flex flex-col-reverse lg:flex-row w-screen h-screen overflow-hidden">
             <Sidebar
                 onAddText={addText}
                 onAddImage={addImage}
