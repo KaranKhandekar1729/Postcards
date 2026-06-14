@@ -1,4 +1,4 @@
-import { Bold, Copy, Trash, Layers } from "lucide-react";
+import { Bold, Copy, Trash, Layers, ChevronDown } from "lucide-react";
 export default function Toolbar({
     toolbarPos,
     isTextObj,
@@ -8,7 +8,11 @@ export default function Toolbar({
     fontOptions,
     selectedFont,
     fontSizeOptions,
+    fontDropdownOpen,
+    setFontDropdownOpen,
     fontSize,
+    fontSizeDropdownOpen,
+    setFontSizeDropdownOpen,
     duplicate,
     deleteSelected,
     showLayerOptions,
@@ -18,7 +22,7 @@ export default function Toolbar({
 
     return (
         <div
-            className="absolute z-9999 bg-white w-max rounded-lg shadow-lg border border-[#ccccccb7] px-1 py-1 flex gap-2"
+            className="absolute z-9999 bg-white w-max rounded-lg shadow-lg border border-[#ccccccb7] px-1 py-1 flex flex-col sm:flex-row gap-2"
             style={{
                 left: toolbarPos.x,
                 top: toolbarPos.y,
@@ -27,28 +31,63 @@ export default function Toolbar({
         >
             {isTextObj && (
                 <div className="flex flex-row gap-1">
-                    <div className="px-2 py-1 bg-[#cccccc70] hover:bg-gray-100 rounded-md"
-                    >
-                        <select value={selectedFont} onChange={updateFontFamily} name="font-family" id="font-family">
-                            {fontOptions.map((fontOption, index) => {
-                                return (
-                                    <option
-                                        key={index}
-                                        value={fontOption.value}
-                                        className="shadow-md border border-[#cccccc86] rounded-md"
-                                    >{fontOption.label}</option>
-                                )
-                            }
-                            )}
-                        </select>
-                    </div>
-                    <div className="px-2 py-1 bg-[#cccccc70] hover:bg-gray-100 rounded-md">
-                        <select value={fontSize} onChange={updateFontSize} name="font-size" id="font-size">
-                            {fontSizeOptions.map((fontSize, index) => (
-                                <option key={index} value={fontSize}>{fontSize}</option>
-                            ))}
-                        </select>
-                    </div>
+                        <div className="px-2 py-1 bg-[#cccccc50] hover:bg-gray-100 rounded-md">
+                            <div className="relative">
+                                <button
+                                    onClick={() => setFontDropdownOpen(v => !v)}
+                                    className="text-sm max-w-[50px] sm:min-w-[150px] flex justify-between items-center cursor-pointer"
+                                    style={{ fontFamily: fontOptions.find(f => f.value === selectedFont)?.label }}
+                                >
+                                    <p className="text-ellipsis text-left text-[10px] sm:text-base overflow-hidden">{fontOptions.find(f => f.value === selectedFont)?.label}</p>
+                                    <span><ChevronDown size="15" className="cursor-pointer"/></span>
+                                </button>
+
+                                {fontDropdownOpen && (
+                                    <div className="absolute top-8 left-0 shadow-lg rounded-lg border bg-white border-gray-100 z-50">
+                                        {fontOptions.map((font, index) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => {
+                                                    updateFontFamily(font.value)
+                                                    setFontDropdownOpen(false)
+                                                }}
+                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                style={{ fontFamily: font.label }}
+                                            >
+                                                {font.label}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="px-2 py-1 bg-[#cccccc50] hover:bg-gray-100 rounded-md">
+                            <div className="relative">
+                                <button
+                                    onClick={() => setFontSizeDropdownOpen(v => !v)} 
+                                    className="text-sm flex justify-between items-center gap-2"
+                                >    
+                                    <p>{fontSize}</p>
+                                    <span><ChevronDown size="15" /></span>
+                                </button>
+                                {fontSizeDropdownOpen && (
+                                    <div className="absolute top-8 bg-white rounded-lg shadow-lg border border-gray-100 z-50 overflow-x-scroll max-h-[150px]">
+                                        {fontSizeOptions.map((fontSize, i) => (
+                                            <div
+                                                key={i}
+                                                onClick={() => {
+                                                    updateFontSize(fontSize)
+                                                    setFontSizeDropdownOpen(false)
+                                                }}
+                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                            >
+                                                {fontSize}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     <button
                         onClick={updateFontWeight}
                         className="px-2 py-1 hover:bg-gray-100 rounded-md"
@@ -57,28 +96,30 @@ export default function Toolbar({
                     </button>
                 </div>
             )}
-            <button
-                onClick={duplicate}
-                className="px-2 py-1 hover:bg-gray-100 rounded"
-            >
-                <Copy size="20" />
-            </button>
+            <div>
+                <button
+                    onClick={duplicate}
+                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                >
+                    <Copy size="20" />
+                </button>
 
-            <button
-                onClick={deleteSelected}
-                className="px-2 py-1 hover:bg-gray-100 rounded"
-            >
-                <Trash size="20" />
-            </button>
+                <button
+                    onClick={deleteSelected}
+                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                >
+                    <Trash size="20" />
+                </button>
 
-            <button
-                onClick={() => setShowLayerOptions((prev) => !prev)}
-                className="relative px-2 py-1 hover:bg-gray-100 rounded"
-            >
-                <Layers size="20" />
-            </button>
+                <button
+                    onClick={() => setShowLayerOptions((prev) => !prev)}
+                    className="relative px-2 py-1 hover:bg-gray-100 rounded"
+                >
+                    <Layers size="20" />
+                </button>
+            </div>
             {showLayerOptions && (
-                <div 
+                <div
                     className="absolute top-11 right-0 p-1 bg-white flex flex-col gap-1 shadow-md rounded-lg"
                     onClick={(e) => e.stopPropagation()}
                 >
