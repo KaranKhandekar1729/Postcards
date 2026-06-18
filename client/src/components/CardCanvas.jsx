@@ -4,14 +4,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
 import Toolbar from "./Toolbar";
+import '../styles/postcard.css';
 
-export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostcardId }) {
+export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricData, postcardId, setPostcardId, activeCanvas, setActiveCanvas }) {
     const { state } = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated, loading } = useAuth()
     const [authOpen, setAuthOpen] = useState(false)
-    const [isFlipped, setIsFlipped] = useState(false)
-    const canvasRef = useRef(null)
+    const envelopeCanvasRef = useRef(null)
     const envelopeRef = useRef(null)
     const [toolbarPos, setToolbarPos] = useState({
         x: 0,
@@ -25,6 +25,43 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
     const [fontSize, setFontSize] = useState(40)
     const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false)
 
+    const [isFlipped, setIsFlipped] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    const [letterState, setLetterState] = useState('idle')
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const handleEnvelopeOpen = async () => { 
+        if (!isFlipped) return
+
+        if (!isOpen && (letterState === 'idle')) {
+            // OPEN flap
+            setIsOpen(true) 
+            await sleep(1200)
+    
+            setLetterState('removing')
+            await sleep(600)
+            setIsOpen(false)
+            await sleep(2500)
+            setLetterState('opened')
+        } else {
+            // CLOSE flap
+            setToolbarPos(prev => ({...prev, visible: false}))
+            letterFabricRef.current?.discardActiveObject()
+            letterFabricRef.current?.renderAll()
+            setActiveCanvas(null)
+            setLetterState('closed')
+            await sleep(2000)
+            setIsOpen(true)
+            await sleep(1200)
+            setLetterState('returning')
+            await sleep(1200)
+            setIsOpen(false)
+            await sleep(200)        
+            setLetterState('idle')
+        }
+    }
+
     const fontOptions = [
         { label: 'Arial', value: 'Arial', url: null },
         { label: 'Times New Roman', value: 'TimesNewRoman', url: null },
@@ -37,20 +74,19 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
     const fontSizeOptions = [12, 14, 16, 18, 20, 24, 30, 36, 40, 48, 56, 64]
 
     useEffect(() => {
-        if (fabricRef?.current) return
+        if (envelopeFabricRef?.current) return
 
         const envelope = envelopeRef?.current;
         const width = envelope.offsetWidth;
         const height = envelope.offsetHeight;
 
-
-        const canvas = new Canvas(canvasRef.current, {
+        const canvas = new Canvas(envelopeCanvasRef.current, {
             width: width,
             height: height,
             backgroundColor: '#fff'
         });
         canvas.renderAll();
-        fabricRef.current = canvas;
+        envelopeFabricRef.current = canvas;
 
         const updateToolbar = () => {
             const obj = canvas.getActiveObject();
@@ -75,7 +111,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
             if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
 
             const rect = obj.getBoundingRect();
-            const canvasWidth = fabricRef?.current.width
+            const canvasWidth = envelopeFabricRef?.current.width
 
             setToolbarPos({
                 visible: true,
@@ -83,15 +119,22 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                 y: rect.top - 80,
             });
         };
-
-        canvas.on("selection:created", updateToolbar);
+        
+        canvas.on("selection:created", () => {
+            setActiveCanvas('envelope')
+            letterFabricRef.current?.discardActiveObject()
+            letterFabricRef.current?.renderAll()
+            updateToolbar()
+        });
         canvas.on("selection:updated", () => {
+            setActiveCanvas('envelope')
             setShowLayerOptions(false)
             setFontDropdownOpen(false)
             setFontSizeDropdownOpen(false)
             updateToolbar()
         });
         canvas.on("selection:cleared", () => {
+            setActiveCanvas(null)
             setToolbarPos(prev => ({
                 ...prev,
                 visible: false,
@@ -100,7 +143,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
             setShowLayerOptions(false)
             setFontDropdownOpen(false)
             setFontSizeDropdownOpen(false)
-        });
+        }); 
 
         canvas.on("object:moving", updateToolbar);
         canvas.on("object:scaling", updateToolbar);
@@ -133,14 +176,14 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         return () => {
             observer.disconnect();
             canvas.dispose();
-            fabricRef.current = null
+            envelopeFabricRef.current = null
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    },[])
 
     // DELETE OBJECT FUNCTION
-    const deleteSelected = () => {
-        const canvas = fabricRef.current;
+    const deleteSelected = (ref) => {
+        const canvas = ref?.current;
         const activeObject = canvas?.getActiveObject();
         if (!activeObject) return;
 
@@ -157,8 +200,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
     };
 
     // COPY-PASTE OBJECT FUNCTION
-    const duplicate = async () => {
-        const canvas = fabricRef.current;
+    const duplicate = async (ref) => {
+        const canvas = ref?.current;
 
         const activeObject = canvas.getActiveObject()
 
@@ -166,7 +209,9 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
 
         const clipboard = await activeObject.clone()
         const clonedObj = await clipboard?.clone()
-
+        console.log(activeObject)
+        console.log(canvas)
+        console.log(letterFabricRef)
         canvas.discardActiveObject();
 
         clonedObj.set({
@@ -192,8 +237,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         canvas.requestRenderAll();
     }
 
-    const setLayerPosition = (position) => {
-        const canvas = fabricRef.current;
+    const setLayerPosition = (position, ref) => {
+        const canvas = ref?.current;
         const obj = canvas?.getActiveObject();
         console.log(obj, canvas)
 
@@ -217,7 +262,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         }))
     }
 
-    const updateFontFamily = async (fontValue) => {
+    const updateFontFamily = async (fontValue, ref) => {
         const selected = fontOptions.find(f => f.value === fontValue)
 
         if (!selected) return
@@ -236,7 +281,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
             }
         }
         
-        const canvas = fabricRef.current;
+        const canvas = ref?.current;
         const obj = canvas?.getActiveObject();
         if (!obj) return;
 
@@ -244,8 +289,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         canvas.renderAll();
     }
 
-    const updateFontWeight = () => {
-        const canvas = fabricRef.current;
+    const updateFontWeight = (ref) => {
+        const canvas = ref?.current;
         const obj = canvas?.getActiveObject();
         if (!obj) return;
 
@@ -256,10 +301,10 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         canvas.renderAll();
     }
 
-    const updateFontSize = (size) => {
+    const updateFontSize = (size, ref) => {
         setFontSize(size);
 
-        const canvas = fabricRef.current;
+        const canvas = ref?.current;
         const obj = canvas?.getActiveObject();
         if (!obj) return;
 
@@ -269,8 +314,8 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         canvas.renderAll();
     }
 
-    const savePostCard = async () => {
-        const canvas = fabricRef?.current
+    const savePostCard = async (ref) => {
+        const canvas = ref?.current
         if (!canvas) return
 
         const dataUrl = canvas.toDataURL({
@@ -338,7 +383,7 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
     }
 
     useEffect(() => {
-        const canvas = fabricRef.current;
+        const canvas = envelopeFabricRef.current;
         if (!canvas || !fabricData) return;
 
         const loadCanvas = async () => {
@@ -358,6 +403,131 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
         setTimeout(loadCanvas, 0);
     }, [fabricData]);
 
+    const letterCanvasRef = useRef(null)
+    const letterRef = useRef(null)
+
+    useEffect(() => {
+        if (letterFabricRef?.current) return
+
+        const letter = letterRef?.current;
+        const width = letter.offsetWidth;
+        const height = letter.offsetHeight;
+
+        const canvas = new Canvas(letterCanvasRef?.current, {
+            width: width,
+            height: height,
+            backgroundColor: '#fff'
+        });
+        canvas.renderAll();
+        letterFabricRef.current = canvas;
+
+        const updateToolbar = () => {
+            const obj = canvas.getActiveObject();
+
+            if (!obj) {
+                setToolbarPos(prev => ({
+                    ...prev,
+                    visible: false,
+                }));
+                return;
+            }
+
+            obj.borderColor = "brown"
+            obj.cornerColor = "brown"
+            obj.cornerStyle = "circle"
+            obj.cornerStrokeColor = "brown"
+            obj.cornerSize = 8
+            obj.transparentCorners = false
+            obj.controls.mtr.visible = false
+
+            // Set state to true if object is of text type~
+            if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
+
+            const rect = obj.getBoundingRect();
+            const canvasWidth = letterFabricRef?.current.width
+
+            setToolbarPos({
+                visible: true,
+                x: rect.left + canvasWidth/4,
+                y: rect.top - 80,
+            });
+        };
+
+        canvas.on("selection:created", () => {
+            setActiveCanvas('letter')
+            envelopeFabricRef.current?.discardActiveObject()
+            envelopeFabricRef.current?.renderAll()
+            updateToolbar()
+        });
+        canvas.on("selection:updated", () => {
+            setActiveCanvas('letter')
+            setShowLayerOptions(false)
+            setFontDropdownOpen(false)
+            setFontSizeDropdownOpen(false)
+            updateToolbar()
+        });
+        canvas.on("selection:cleared", () => {
+            setActiveCanvas(null)
+            setToolbarPos(prev => ({
+                ...prev,
+                visible: false,
+            }));
+            setIsTextObj(false);
+            setShowLayerOptions(false)
+            setFontDropdownOpen(false)
+            setFontSizeDropdownOpen(false)
+        });
+
+        canvas.on("object:moving", updateToolbar);
+        canvas.on("object:scaling", updateToolbar);
+        canvas.on("object:rotating", updateToolbar);
+
+        const observer = new ResizeObserver(() => {
+            const w = letter.offsetWidth;
+            const h = letter.offsetHeight;
+
+            const scaleX = w / canvas.width;
+            const scaleY = h / canvas.height;
+
+            canvas.setDimensions({ width: w, height: h });
+
+            canvas.getObjects().forEach(obj => {
+                obj.set({
+                    left: obj.left * scaleX,
+                    top: obj.top * scaleY,
+                    scaleX: obj.scaleX * scaleX,
+                    scaleY: obj.scaleY * scaleY,
+                });
+                obj.setCoords();
+            });
+
+
+            canvas.renderAll();
+        });
+        observer.observe(letter);
+
+        return () => {
+            observer.disconnect();
+            canvas.dispose();
+            letterFabricRef.current = null
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[])
+
+
+    const handleEnvelopeFlip = () => {
+        setIsFlipped(prev => !prev); 
+        setIsOpen(false); 
+        setLetterState('idle')
+        envelopeFabricRef.current?.discardActiveObject()
+        envelopeFabricRef.current?.renderAll()
+        letterFabricRef.current?.discardActiveObject()
+        letterFabricRef.current?.renderAll()
+        setActiveCanvas(null)
+        setToolbarPos(prev => ({ ...prev, visible: false }));
+
+    }
+
     return (
         <>
             <div className="perspective-distant h-screen flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
@@ -374,12 +544,12 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
 
                     {/* Back */}
                     <div
-
                         className="absolute inset-0 backface-hidden shadow-inner flex items-center justify-center z-50"
                     >
-                        <canvas ref={canvasRef} />
-                        {toolbarPos.visible && (
+                        <canvas ref={envelopeCanvasRef} />
+                        {(toolbarPos.visible && activeCanvas === 'envelope') && (
                             <Toolbar
+                                fabricRef={envelopeFabricRef}
                                 toolbarPos={toolbarPos}
                                 isTextObj={isTextObj}
                                 updateFontFamily={updateFontFamily}
@@ -414,29 +584,58 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                             ease-in-out origin-top before:content-[''] 
                             before:origin-top before:w-full before:h-full 
                             before:bg-white before:absolute before:[clip-path:polygon(50%_100%,0_0,100%_0)] 
-                            z-30
+                            ${isOpen ? 'rotate-x-180 z-10' : 'z-30'}
                             before:transition-all before:duration-200 before:ease-in-out`}>
                         </div>
 
                         {/* Letter */}
                         <div
+                            ref={letterRef}
                             className={`absolute bg-[#fdf6d3] 
-                                shadow-lg border border-[#ccc] 
-                                w-11/12 h-3/4 top-8 md:top-15
+                                shadow-lg border border-[#ccccccb7] 
+                                w-11/12 h-3/4 top-8 md:top-15 z-10
                                 left-4 xs:left-5 sm:left-6 md:left-8 perspective-distant 
                                 before:content-[''] before:bg-[#fdf6d3] 
-                                before:border before:border-[#ccc] 
+                                before:border before:border-[#ccccccb7] 
                                 before:absolute before:h-3/4 before:w-full 
-                                before:rotate-x-5 before:origin-top 
+                                before:origin-top 
                                 before:transform-3d after:content-['']
                                 after:bg-[#fdf6d3] after:border 
-                                after:border-[#ccc] after:bottom-0 
-                                after:rotate-x-[-5deg] after:origin-bottom 
+                                after:border-[#ccccccb7] after:bottom-0 
+                                after:origin-bottom 
                                 after:absolute after:h-3/4 after:w-full 
                                 after:transform-3d
                                 transition-all
-                                duration-2000 z-10
+                                duration-2000
+                                ${ letterState === 'removing' ? 'letter-remove': ''} 
+                                ${ letterState === 'returning' ? 'letter-return': ''}
+                                ${ letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 -top-12! before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' }
+                                ${ letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' } 
                             `}>
+                                <canvas ref={letterCanvasRef} />
+                                {(toolbarPos.visible && activeCanvas === 'letter') && (
+                                    <Toolbar
+                                        fabricRef={letterFabricRef}
+                                        toolbarPos={toolbarPos}
+                                        isTextObj={isTextObj}
+                                        updateFontFamily={updateFontFamily}
+                                        updateFontSize={updateFontSize}
+                                        updateFontWeight={updateFontWeight}
+                                        fontOptions={fontOptions}
+                                        selectedFont={selectedFont}
+                                        fontSizeOptions={fontSizeOptions}
+                                        fontDropdownOpen={fontDropdownOpen}
+                                        setFontDropdownOpen={setFontDropdownOpen}
+                                        fontSize={fontSize}
+                                        fontSizeDropdownOpen={fontSizeDropdownOpen}
+                                        setFontSizeDropdownOpen={setFontSizeDropdownOpen}
+                                        duplicate={duplicate}
+                                        deleteSelected={deleteSelected}
+                                        showLayerOptions={showLayerOptions}
+                                        setShowLayerOptions={setShowLayerOptions}
+                                        setLayerPosition={setLayerPosition}
+                                    />
+                                )}
                         </div>
 
                         {/* Inner gradient for depth */}
@@ -450,11 +649,14 @@ export default function CardCanvas({ fabricRef, fabricData, postcardId, setPostc
                 </div>
                 <div className="relative top-[85px] flex gap-3">
                     <button
-                        onClick={() => setIsFlipped(prev => !prev)}
+                        onClick={handleEnvelopeFlip}
                         className='bg-white p-4 w-[100px] lg:w-32 cursor-pointer'
                     >
                         Flip
                     </button>
+                    { isFlipped &&
+                        <button onClick={() => handleEnvelopeOpen()} className='bg-white p-4 w-[100px]'>{letterState === "opened" ? 'Close' : 'Open'}</button>
+                    }
                     <button
                         onClick={() => handleSave()}
                         disabled={loading}

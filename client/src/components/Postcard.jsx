@@ -1,7 +1,7 @@
 import { useState } from "react";
 import '../styles/postcard.css';
 
-export default function Postcard({ cardData }) {
+export default function Postcard() {
     const [isFlipped, setIsFlipped] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [letterState, setLetterState] = useState('idle')
@@ -49,46 +49,7 @@ export default function Postcard({ cardData }) {
                     ${isFlipped ? 'rotate-y-180' : ''} origin-center`}>
 
                     {/* Back */}
-                    <div
-                        className="absolute inset-0 backface-hidden shadow-inner flex items-center justify-center"
-                        style={{ backgroundColor: `${cardData[0].envelope.envelopeColor}` }}
-                    >
-                        {cardData && (
-                            cardData[0].envelope.elements.map((element) => (
-                                element.type === 'sticker'
-                                    ? <img
-                                        key={element._id}
-                                        src={element.assetUrl}
-                                        style={{
-                                            position: 'absolute',
-                                            width: `${element.width * 100}%`,
-                                            height: `${element.height * 100}%`,
-                                            left: `${element.x * 100}%`,
-                                            top: `${element.y * 100}%`,
-                                            zIndex: element.zIndex,
-                                            transform: `rotate(${element.rotation}deg)`
-                                        }}
-                                    />
-                                    : <p
-                                        key={element._id}
-                                        style={{
-                                            position: 'absolute',
-                                            width: `${element.width * 100}%`,
-                                            height: `${element.height * 100}%`,
-                                            left: `${element.x * 100}%`,
-                                            top: `${element.y * 100}%`,
-                                            zIndex: element.zIndex,
-                                            transform: `rotate(${element.rotation}deg)`,
-                                            fontSize: `${element.fontSize}px`,
-                                            fontFamily: element.fontFamily,
-                                            color: element.color
-                                        }}
-                                    >
-                                        {element.content}
-                                    </p>
-                            ))
-                        )}
-                    </div>
+                    <div className="absolute inset-0 backface-hidden shadow-inner flex items-center justify-center"></div>
 
                     {/* Front */}
                     <div className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
@@ -142,7 +103,12 @@ export default function Postcard({ cardData }) {
 
                 {/* Buttons */}
                 <div className='relative top-[85px] flex flex-row gap-4'>
-                    <button onClick={() => { setIsFlipped(prev => !prev); setIsOpen(false); setLetterState('idle') }} className='bg-white p-4 w-32'>Flip</button>
+                    <button 
+                        onClick={() => { setIsFlipped(prev => !prev); setIsOpen(false); setLetterState('idle') }} 
+                        className='bg-white p-4 w-32'
+                    >
+                        Flip
+                    </button>
                     { isFlipped &&
                         <button onClick={() => handleEnvelopeOpen()} className='bg-white p-4 w-[100px]'>{letterState === "opened" ? 'Close' : 'Open'}</button>
                     }

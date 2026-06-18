@@ -6,10 +6,12 @@ import CardCanvas from "../components/CardCanvas";
 
 export default function EditingView() {
     const [isUploading, setIsUploading] = useState(false);
-    const fabricRef = useRef(null);
+    const envelopeFabricRef = useRef(null);
+    const letterFabricRef = useRef(null);
     const { slug } = useParams();
     const [postcard, setPostcard] = useState(null);
     const [postcardId, setPostcardId] = useState(null);
+    const [activeCanvas, setActiveCanvas] = useState('envelope')
 
     const uploadToCloudinary = async (file) => {
         if (!file) return;
@@ -25,19 +27,21 @@ export default function EditingView() {
         return data.url;
     };
 
-    const addText = () => {
+    const addText = (canvas) => {
+        console.log("Clicked addText")
+        console.log(canvas)
         const text = new IText("Hello", {
             fontFamily: "Arial",
             fill: "#000",
             editable: true,
         });
 
-        fabricRef.current?.add(text);
-        fabricRef.current?.centerObject(text);
-        fabricRef.current?.renderAll()
+        canvas?.add(text);
+        canvas?.centerObject(text);
+        canvas?.renderAll()
     };
 
-    const addImage = async (e) => {
+    const addImage = async (e, canvas) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -50,9 +54,9 @@ export default function EditingView() {
         });
 
         img.scaleToWidth(150);
-        fabricRef.current?.add(img);
-        fabricRef.current?.centerObject(img);
-        fabricRef.current?.renderAll()
+        canvas?.add(img);
+        canvas?.centerObject(img);
+        canvas?.renderAll()
     };
 
     // fetch postcard
@@ -81,13 +85,19 @@ export default function EditingView() {
                 onAddText={addText}
                 onAddImage={addImage}
                 isUploading={isUploading}
+                envelopeFabricRef={envelopeFabricRef}
+                letterFabricRef={letterFabricRef}
+                activeCanvas={activeCanvas}
             />
 
             <CardCanvas
-                fabricRef={fabricRef}
+                envelopeFabricRef={envelopeFabricRef}
+                letterFabricRef={letterFabricRef}
                 fabricData={postcard?.fabricData}
                 postcardId={postcardId}
                 setPostcardId={setPostcardId}
+                activeCanvas={activeCanvas}
+                setActiveCanvas={setActiveCanvas}
             />
         </div>
     );
