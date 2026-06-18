@@ -1,5 +1,6 @@
 import { Bold, Copy, Trash, Layers, ChevronDown } from "lucide-react";
 export default function Toolbar({
+    fabricRef,
     toolbarPos,
     isTextObj,
     updateFontFamily,
@@ -22,7 +23,7 @@ export default function Toolbar({
 
     return (
         <div
-            className="absolute z-9999 bg-white w-max rounded-lg shadow-lg border border-[#ccccccb7] px-1 py-1 flex flex-col sm:flex-row gap-2"
+            className="absolute z-9 backface-hidden bg-white w-max rounded-lg shadow-lg border border-[#ccccccb7] px-1 py-1 flex flex-col sm:flex-row gap-2"
             style={{
                 left: toolbarPos.x,
                 top: toolbarPos.y,
@@ -48,7 +49,7 @@ export default function Toolbar({
                                             <div
                                                 key={index}
                                                 onClick={() => {
-                                                    updateFontFamily(font.value)
+                                                    updateFontFamily(font.value, fabricRef)
                                                     setFontDropdownOpen(false)
                                                 }}
                                                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
@@ -76,7 +77,7 @@ export default function Toolbar({
                                             <div
                                                 key={i}
                                                 onClick={() => {
-                                                    updateFontSize(fontSize)
+                                                    updateFontSize(fontSize, fabricRef)
                                                     setFontSizeDropdownOpen(false)
                                                 }}
                                                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
@@ -89,7 +90,7 @@ export default function Toolbar({
                             </div>
                         </div>
                     <button
-                        onClick={updateFontWeight}
+                        onClick={() => updateFontWeight(fabricRef)}
                         className="px-2 py-1 hover:bg-gray-100 rounded-md"
                     >
                         <Bold size="20" />
@@ -98,14 +99,14 @@ export default function Toolbar({
             )}
             <div>
                 <button
-                    onClick={duplicate}
+                    onClick={() => duplicate(fabricRef)}
                     className="px-2 py-1 hover:bg-gray-100 rounded"
                 >
                     <Copy size="20" />
                 </button>
 
                 <button
-                    onClick={deleteSelected}
+                    onClick={() => deleteSelected(fabricRef)}
                     className="px-2 py-1 hover:bg-gray-100 rounded"
                 >
                     <Trash size="20" />
@@ -123,8 +124,8 @@ export default function Toolbar({
                     className="absolute top-11 right-0 p-1 bg-white flex flex-col gap-1 shadow-md rounded-lg"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div onClick={() => setLayerPosition('front')} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Bring to Front</div>
-                    <div onClick={() => setLayerPosition('back')} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Send to Back</div>
+                    <div onClick={() => setLayerPosition('front', fabricRef)} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Bring to Front</div>
+                    <div onClick={() => setLayerPosition('back', fabricRef)} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Send to Back</div>
                 </div>
             )}
         </div>
