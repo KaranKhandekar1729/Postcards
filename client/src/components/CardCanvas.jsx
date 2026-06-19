@@ -25,6 +25,24 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
     const [isFlipped, setIsFlipped] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [letterState, setLetterState] = useState('idle')
+    const letterFoldRef = useRef(null)
+    const [letterCanvasHeight, setLetterCanvasHeight] = useState()
+    const [letterCanvasTop, setLetterCanvasTop] = useState()
+
+    useEffect(() => {
+        if (!letterFoldRef.current) return
+        const measure = () => {
+            const middleDivHeight = letterFoldRef.current.offsetHeight
+            const foldDivTop = letterFoldRef.current.offsetTop 
+            setLetterCanvasHeight(middleDivHeight * 2.5)
+            setLetterCanvasTop(foldDivTop - middleDivHeight * 0.75)
+        }
+
+        measure()
+        const observer = new ResizeObserver(measure)
+        observer.observe(letterFoldRef.current)
+        return () => observer.disconnect()
+    })
 
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -396,11 +414,11 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
 
                         {/* Letter */}
                         <div
-                            ref={letterRef}
+                            ref={letterFoldRef}
                             className={`absolute bg-[#fdf6d3] 
                                 shadow-lg border border-[#ccccccb7] 
-                                w-11/12 h-3/4 top-8 md:top-15 z-10
-                                left-4 xs:left-5 sm:left-6 md:left-8 perspective-distant 
+                                w-11/12 h-[160px] xs:h-[210px] sm:h-[240px] md:w-[550px] md:h-[230px] lg:h-[250px] xl:h-[280px] top-8 md:top-15 z-10
+                                left-2/4 md:right-2/4 -translate-x-2/4  perspective-distant 
                                 before:content-[''] before:bg-[#fdf6d3] 
                                 before:border before:border-[#ccccccb7] 
                                 before:absolute before:h-3/4 before:w-full 
@@ -415,33 +433,46 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
                                 duration-2000
                                 ${ letterState === 'removing' ? 'letter-remove': ''} 
                                 ${ letterState === 'returning' ? 'letter-return': ''}
-                                ${ letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 -top-12! before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' }
+                                ${ letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 -top-1! before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' }
                                 ${ letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' } 
                             `}>
-                                <canvas ref={letterCanvasRef} />
-                                {(toolbarPos.visible && activeCanvas === 'letter') && (
-                                    <Toolbar
-                                        fabricRef={letterFabricRef}
-                                        toolbarPos={toolbarPos}
-                                        isTextObj={isTextObj}
-                                        updateFontFamily={updateFontFamily}
-                                        updateFontSize={updateFontSize}
-                                        updateFontWeight={updateFontWeight}
-                                        fontOptions={fontOptions}
-                                        selectedFont={selectedFont}
-                                        fontSizeOptions={fontSizeOptions}
-                                        fontDropdownOpen={fontDropdownOpen}
-                                        setFontDropdownOpen={setFontDropdownOpen}
-                                        fontSize={fontSize}
-                                        fontSizeDropdownOpen={fontSizeDropdownOpen}
-                                        setFontSizeDropdownOpen={setFontSizeDropdownOpen}
-                                        duplicate={duplicate}
-                                        deleteSelected={deleteSelected}
-                                        showLayerOptions={showLayerOptions}
-                                        setShowLayerOptions={setShowLayerOptions}
-                                        setLayerPosition={setLayerPosition}
-                                    />
-                                )}
+                        </div>
+                        <div 
+                            ref={letterRef}
+                            className="absolute w-11/12 md:w-[550px] left-2/4 md:right-2/4 -translate-x-2/4"
+                            style={{
+                                height: letterCanvasHeight ? `${letterCanvasHeight}px` : undefined,
+                                top: letterCanvasTop ? `${letterCanvasTop}px` : undefined,
+                                opacity: letterState === 'opened' ? 1 : 0,
+                                zIndex: '40',
+                                pointerEvents: letterState === 'opened' ? 'auto' : 'none',
+                                transition: `opacity ${letterState === 'closed' ? 800: 4600}ms ease-in-out`
+                            }}
+                        >
+                            <canvas ref={letterCanvasRef} />
+                            {(toolbarPos.visible && activeCanvas === 'letter') && (
+                                <Toolbar
+                                    fabricRef={letterFabricRef}
+                                    toolbarPos={toolbarPos}
+                                    isTextObj={isTextObj}
+                                    updateFontFamily={updateFontFamily}
+                                    updateFontSize={updateFontSize}
+                                    updateFontWeight={updateFontWeight}
+                                    fontOptions={fontOptions}
+                                    selectedFont={selectedFont}
+                                    fontSizeOptions={fontSizeOptions}
+                                    fontDropdownOpen={fontDropdownOpen}
+                                    setFontDropdownOpen={setFontDropdownOpen}
+                                    fontSize={fontSize}
+                                    fontSizeDropdownOpen={fontSizeDropdownOpen}
+                                    setFontSizeDropdownOpen={setFontSizeDropdownOpen}
+                                    duplicate={duplicate}
+                                    deleteSelected={deleteSelected}
+                                    showLayerOptions={showLayerOptions}
+                                    setShowLayerOptions={setShowLayerOptions}
+                                    setLayerPosition={setLayerPosition}
+                                />
+                            )}
                         </div>
 
                         {/* Inner gradient for depth */}
