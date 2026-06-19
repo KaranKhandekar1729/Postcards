@@ -77,6 +77,43 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         }
     }
 
+    const [isFlipped, setIsFlipped] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    const [letterState, setLetterState] = useState('idle')
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const handleEnvelopeOpen = async () => { 
+        if (!isFlipped) return
+
+        if (!isOpen && (letterState === 'idle')) {
+            // OPEN flap
+            setIsOpen(true) 
+            await sleep(1200)
+    
+            setLetterState('removing')
+            await sleep(600)
+            setIsOpen(false)
+            await sleep(2500)
+            setLetterState('opened')
+        } else {
+            // CLOSE flap
+            setToolbarPos(prev => ({...prev, visible: false}))
+            letterFabricRef.current?.discardActiveObject()
+            letterFabricRef.current?.renderAll()
+            setActiveCanvas(null)
+            setLetterState('closed')
+            await sleep(2000)
+            setIsOpen(true)
+            await sleep(1200)
+            setLetterState('returning')
+            await sleep(1200)
+            setIsOpen(false)
+            await sleep(200)        
+            setLetterState('idle')
+        }
+    }
+
     const fontOptions = [
         { label: 'Arial', value: 'Arial', url: null },
         { label: 'Times New Roman', value: 'TimesNewRoman', url: null },
@@ -436,6 +473,30 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
                                 ${ letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 -top-1! before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' }
                                 ${ letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' } 
                             `}>
+                                <canvas ref={letterCanvasRef} />
+                                {(toolbarPos.visible && activeCanvas === 'letter') && (
+                                    <Toolbar
+                                        fabricRef={letterFabricRef}
+                                        toolbarPos={toolbarPos}
+                                        isTextObj={isTextObj}
+                                        updateFontFamily={updateFontFamily}
+                                        updateFontSize={updateFontSize}
+                                        updateFontWeight={updateFontWeight}
+                                        fontOptions={fontOptions}
+                                        selectedFont={selectedFont}
+                                        fontSizeOptions={fontSizeOptions}
+                                        fontDropdownOpen={fontDropdownOpen}
+                                        setFontDropdownOpen={setFontDropdownOpen}
+                                        fontSize={fontSize}
+                                        fontSizeDropdownOpen={fontSizeDropdownOpen}
+                                        setFontSizeDropdownOpen={setFontSizeDropdownOpen}
+                                        duplicate={duplicate}
+                                        deleteSelected={deleteSelected}
+                                        showLayerOptions={showLayerOptions}
+                                        setShowLayerOptions={setShowLayerOptions}
+                                        setLayerPosition={setLayerPosition}
+                                    />
+                                )}
                         </div>
                         <div 
                             ref={letterRef}
