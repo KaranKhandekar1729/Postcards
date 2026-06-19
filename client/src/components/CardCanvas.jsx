@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Canvas } from "fabric";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
 import Toolbar from "./Toolbar";
+import useFabricCanvas from "../hooks/useFabricCanvas";
 import '../styles/postcard.css';
 
 export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricData, postcardId, setPostcardId, activeCanvas, setActiveCanvas }) {
@@ -13,18 +13,15 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
     const [authOpen, setAuthOpen] = useState(false)
     const envelopeCanvasRef = useRef(null)
     const envelopeRef = useRef(null)
-    const [toolbarPos, setToolbarPos] = useState({
-        x: 0,
-        y: 0,
-        visible: false,
-    });
+    const letterCanvasRef = useRef(null)
+    const letterRef = useRef(null)
+    const [toolbarPos, setToolbarPos] = useState({ x: 0, y: 0, visible: false });
     const [showLayerOptions, setShowLayerOptions] = useState(false)
     const [isTextObj, setIsTextObj] = useState(false)
     const [selectedFont, setSelectedFont] = useState('Arial')
     const [fontDropdownOpen, setFontDropdownOpen] = useState(false)
     const [fontSize, setFontSize] = useState(40)
     const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false)
-
     const [isFlipped, setIsFlipped] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [letterState, setLetterState] = useState('idle')
@@ -73,113 +70,33 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
 
     const fontSizeOptions = [12, 14, 16, 18, 20, 24, 30, 36, 40, 48, 56, 64]
 
-    useEffect(() => {
-        if (envelopeFabricRef?.current) return
+    useFabricCanvas({
+        canvasElRef: envelopeCanvasRef,
+        containerElRef: envelopeRef,
+        fabricRef: envelopeFabricRef,
+        otherFabricRef: letterFabricRef,
+        canvasName: 'envelope',
+        setActiveCanvas,
+        setToolbarPos,
+        setIsTextObj,
+        setShowLayerOptions,
+        setFontDropdownOpen,
+        setFontSizeDropdownOpen
+    })
 
-        const envelope = envelopeRef?.current;
-        const width = envelope.offsetWidth;
-        const height = envelope.offsetHeight;
-
-        const canvas = new Canvas(envelopeCanvasRef.current, {
-            width: width,
-            height: height,
-            backgroundColor: '#fff'
-        });
-        canvas.renderAll();
-        envelopeFabricRef.current = canvas;
-
-        const updateToolbar = () => {
-            const obj = canvas.getActiveObject();
-
-            if (!obj) {
-                setToolbarPos(prev => ({
-                    ...prev,
-                    visible: false,
-                }));
-                return;
-            }
-
-            obj.borderColor = "brown"
-            obj.cornerColor = "brown"
-            obj.cornerStyle = "circle"
-            obj.cornerStrokeColor = "brown"
-            obj.cornerSize = 8
-            obj.transparentCorners = false
-            obj.controls.mtr.visible = false
-
-            // Set state to true if object is of text type~
-            if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
-
-            const rect = obj.getBoundingRect();
-            const canvasWidth = envelopeFabricRef?.current.width
-
-            setToolbarPos({
-                visible: true,
-                x: rect.left + canvasWidth/4,
-                y: rect.top - 80,
-            });
-        };
-        
-        canvas.on("selection:created", () => {
-            setActiveCanvas('envelope')
-            letterFabricRef.current?.discardActiveObject()
-            letterFabricRef.current?.renderAll()
-            updateToolbar()
-        });
-        canvas.on("selection:updated", () => {
-            setActiveCanvas('envelope')
-            setShowLayerOptions(false)
-            setFontDropdownOpen(false)
-            setFontSizeDropdownOpen(false)
-            updateToolbar()
-        });
-        canvas.on("selection:cleared", () => {
-            setActiveCanvas(null)
-            setToolbarPos(prev => ({
-                ...prev,
-                visible: false,
-            }));
-            setIsTextObj(false);
-            setShowLayerOptions(false)
-            setFontDropdownOpen(false)
-            setFontSizeDropdownOpen(false)
-        }); 
-
-        canvas.on("object:moving", updateToolbar);
-        canvas.on("object:scaling", updateToolbar);
-        canvas.on("object:rotating", updateToolbar);
-
-        const observer = new ResizeObserver(() => {
-            const w = envelope.offsetWidth;
-            const h = envelope.offsetHeight;
-
-            const scaleX = w / canvas.width;
-            const scaleY = h / canvas.height;
-
-            canvas.setDimensions({ width: w, height: h });
-
-            canvas.getObjects().forEach(obj => {
-                obj.set({
-                    left: obj.left * scaleX,
-                    top: obj.top * scaleY,
-                    scaleX: obj.scaleX * scaleX,
-                    scaleY: obj.scaleY * scaleY,
-                });
-                obj.setCoords();
-            });
-
-
-            canvas.renderAll();
-        });
-        observer.observe(envelope);
-
-        return () => {
-            observer.disconnect();
-            canvas.dispose();
-            envelopeFabricRef.current = null
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[])
+    useFabricCanvas({
+        canvasElRef: letterCanvasRef,
+        containerElRef: letterRef,
+        fabricRef: letterFabricRef,
+        otherFabricRef: envelopeFabricRef,
+        canvasName: 'letter',
+        setActiveCanvas,
+        setToolbarPos,
+        setIsTextObj,
+        setShowLayerOptions,
+        setFontDropdownOpen,
+        setFontSizeDropdownOpen
+    })
 
     // DELETE OBJECT FUNCTION
     const deleteSelected = (ref) => {
@@ -402,117 +319,6 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
 
         setTimeout(loadCanvas, 0);
     }, [fabricData]);
-
-    const letterCanvasRef = useRef(null)
-    const letterRef = useRef(null)
-
-    useEffect(() => {
-        if (letterFabricRef?.current) return
-
-        const letter = letterRef?.current;
-        const width = letter.offsetWidth;
-        const height = letter.offsetHeight;
-
-        const canvas = new Canvas(letterCanvasRef?.current, {
-            width: width,
-            height: height,
-            backgroundColor: '#fff'
-        });
-        canvas.renderAll();
-        letterFabricRef.current = canvas;
-
-        const updateToolbar = () => {
-            const obj = canvas.getActiveObject();
-
-            if (!obj) {
-                setToolbarPos(prev => ({
-                    ...prev,
-                    visible: false,
-                }));
-                return;
-            }
-
-            obj.borderColor = "brown"
-            obj.cornerColor = "brown"
-            obj.cornerStyle = "circle"
-            obj.cornerStrokeColor = "brown"
-            obj.cornerSize = 8
-            obj.transparentCorners = false
-            obj.controls.mtr.visible = false
-
-            // Set state to true if object is of text type~
-            if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
-
-            const rect = obj.getBoundingRect();
-            const canvasWidth = letterFabricRef?.current.width
-
-            setToolbarPos({
-                visible: true,
-                x: rect.left + canvasWidth/4,
-                y: rect.top - 80,
-            });
-        };
-
-        canvas.on("selection:created", () => {
-            setActiveCanvas('letter')
-            envelopeFabricRef.current?.discardActiveObject()
-            envelopeFabricRef.current?.renderAll()
-            updateToolbar()
-        });
-        canvas.on("selection:updated", () => {
-            setActiveCanvas('letter')
-            setShowLayerOptions(false)
-            setFontDropdownOpen(false)
-            setFontSizeDropdownOpen(false)
-            updateToolbar()
-        });
-        canvas.on("selection:cleared", () => {
-            setActiveCanvas(null)
-            setToolbarPos(prev => ({
-                ...prev,
-                visible: false,
-            }));
-            setIsTextObj(false);
-            setShowLayerOptions(false)
-            setFontDropdownOpen(false)
-            setFontSizeDropdownOpen(false)
-        });
-
-        canvas.on("object:moving", updateToolbar);
-        canvas.on("object:scaling", updateToolbar);
-        canvas.on("object:rotating", updateToolbar);
-
-        const observer = new ResizeObserver(() => {
-            const w = letter.offsetWidth;
-            const h = letter.offsetHeight;
-
-            const scaleX = w / canvas.width;
-            const scaleY = h / canvas.height;
-
-            canvas.setDimensions({ width: w, height: h });
-
-            canvas.getObjects().forEach(obj => {
-                obj.set({
-                    left: obj.left * scaleX,
-                    top: obj.top * scaleY,
-                    scaleX: obj.scaleX * scaleX,
-                    scaleY: obj.scaleY * scaleY,
-                });
-                obj.setCoords();
-            });
-
-
-            canvas.renderAll();
-        });
-        observer.observe(letter);
-
-        return () => {
-            observer.disconnect();
-            canvas.dispose();
-            letterFabricRef.current = null
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[])
 
 
     const handleEnvelopeFlip = () => {
