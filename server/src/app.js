@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv'; 
 import cookieParser from 'cookie-parser';
-import postRouter from './routes/postcard.routes.js';
+import envelopeRouter from './routes/envelope.routes.js';
 import uploadRouter from './routes/cloudinary.router.js';
 import authRouter from './routes/auth.routes.js';
 
@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
 }
 
-app.use('/api/postcards', postRouter);
+app.use('/api/envelope', envelopeRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/auth', authRouter);
 

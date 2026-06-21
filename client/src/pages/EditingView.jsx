@@ -2,15 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { FabricImage, IText } from "fabric";
 import Sidebar from "../components/Sidebar";
-import CardCanvas from "../components/CardCanvas";
+import EnvelopeCanvas from "../components/EnvelopeCanvas";
 
 export default function EditingView() {
     const [isUploading, setIsUploading] = useState(false);
     const envelopeFabricRef = useRef(null);
     const letterFabricRef = useRef(null);
     const { slug } = useParams();
-    const [postcard, setPostcard] = useState(null);
-    const [postcardId, setPostcardId] = useState(null);
+    const [envelope, setEnvelope] = useState(null);
+    const [envelopeId, setEnvelopeId] = useState(null);
     const [activeCanvas, setActiveCanvas] = useState('envelope')
 
     const uploadToCloudinary = async (file) => {
@@ -59,23 +59,23 @@ export default function EditingView() {
         canvas?.renderAll()
     };
 
-    // fetch postcard
+    // fetch envelope
     useEffect(() => {
         if (!slug) return;
 
-        const getPostcard = async () => {
+        const getEnvelope = async () => {
             const res = await fetch(
-                `http://localhost:3000/api/postcards/${slug}`, {
+                `http://localhost:3000/api/envelopes/${slug}`, {
                     credentials: 'include'
                 }
             );
             const data = await res.json();
-            setPostcard(data.data);
-            setPostcardId(data.data._id)
+            setEnvelope(data.data);
+            setEnvelopeId(data.data._id)
             console.log(data.data)
         };
 
-        getPostcard();
+        getEnvelope();
     }, [slug]);
 
 
@@ -90,12 +90,12 @@ export default function EditingView() {
                 activeCanvas={activeCanvas}
             />
 
-            <CardCanvas
+            <EnvelopeCanvas
                 envelopeFabricRef={envelopeFabricRef}
                 letterFabricRef={letterFabricRef}
-                fabricData={postcard?.fabricData}
-                postcardId={postcardId}
-                setPostcardId={setPostcardId}
+                fabricData={envelope?.fabricData}
+                envelopeId={envelopeId}
+                setEnvelopeId={setEnvelopeId}
                 activeCanvas={activeCanvas}
                 setActiveCanvas={setActiveCanvas}
             />

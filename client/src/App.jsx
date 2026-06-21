@@ -6,7 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import Postcard from './components/Postcard';
+import Envelope from './components/Envelope';
 
 function App() {
   return (
@@ -16,9 +16,9 @@ function App() {
           <Route path="/" element={ <Home /> } />
           <Route path="/signup" element={ <SignUp /> } />
           <Route path="/login" element={<Login />}/>
-          <Route path="/p" element={ <Postcard cardData={[]} /> } />
-          <Route path="/postcard/new" element={ <EditingView /> } />
-          <Route path="/postcard/edit/:slug" element={
+          <Route path="/p" element={ <Envelope envelopeData={[]} /> } />
+          <Route path="/envelope/new" element={ <EditingView /> } />
+          <Route path="/envelope/edit/:slug" element={
             <ProtectedRoute>
               <EditingView />
             </ProtectedRoute> 

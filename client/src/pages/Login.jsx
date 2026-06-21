@@ -19,7 +19,7 @@ export default function Login () {
         setLoading(true);
         try {
         await login(email, password);
-        navigate('/postcard/new');
+        navigate('/envelope/new');
         } catch (err) {
         setError(err.message);
         } finally {
@@ -33,7 +33,7 @@ export default function Login () {
         <div className="mb-8 text-center">
           <span className="text-3xl">✉</span>
           <h1 className="mt-3 text-xl font-semibold text-stone-800">Create an account</h1>
-          <p className="text-sm text-stone-400 mt-1">Start sending postcards</p>
+          <p className="text-sm text-stone-400 mt-1">Start sending letters</p>
         </div>
 
         {error && (

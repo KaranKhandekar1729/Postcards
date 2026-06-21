@@ -1,7 +1,7 @@
 import { useState } from "react";
-import '../styles/postcard.css';
+import '../styles/envelope.css';
 
-export default function Postcard() {
+export default function Envelope() {
     const [isFlipped, setIsFlipped] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [letterState, setLetterState] = useState('idle')

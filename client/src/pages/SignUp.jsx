@@ -20,7 +20,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await register(username, email, password);
-      navigate('/postcard/new');
+      navigate('/envelope/new');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -34,7 +34,7 @@ export default function SignUp() {
 
         <div className="mb-8 text-center">
           <h1 className="mt-3 text-xl font-semibold text-stone-800">Create an account</h1>
-          <p className="text-sm text-stone-400 mt-1">Start sending postcards</p>
+          <p className="text-sm text-stone-400 mt-1">Start sending digital letters</p>
         </div>
 
         {error && (
