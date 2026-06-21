@@ -1,22 +1,11 @@
 import mongoose from 'mongoose'
-import elementSchema from './Element.js'
 
-const postcardSchema = new mongoose.Schema({
+const envelopeSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
         trim: true,
         maxlength: [50, 'Title can be max 20 characters only']
-    },
-
-    thumbnail: {
-        type: String,
-        required: true,
-    },
-
-    fabricData: {
-        type: Object,
-        required: true,
     },
 
     slug: {
@@ -48,14 +37,22 @@ const postcardSchema = new mongoose.Schema({
         envelopeColor: {
             type: String,
             default: '#ffffff'
-        }
+        },
+        fabricData: {
+            type: Object,
+            required: true,
+        },
     },
     // Letter content/design
     letter: {
         backgroundColor: {
             type: String,
             default: '#fffaf0'
-        }
+        },
+        fabricData: {
+            type: Object,
+            required: true,
+        },
     },
 
     status: {
@@ -77,7 +74,7 @@ const postcardSchema = new mongoose.Schema({
     timestamps: true
 });
 
-postcardSchema.pre('save', async function () {
+envelopeSchema.pre('save', async function () {
     if (!this.isModified('title')) return
 
     let slug = this.title
@@ -87,23 +84,23 @@ postcardSchema.pre('save', async function () {
         .replace(/-+/g, '-')
         .trim();
 
-    const exisitingPostcard = await mongoose
+    const exisitingEnvelope = await mongoose
         .model('Postcard')
         .findOne({ slug });
 
-    if (exisitingPostcard && exisitingPostcard._id.toString() !== this._id.toString()) {
+    if (exisitingEnvelope && exisitingEnvelope._id.toString() !== this._id.toString()) {
         slug = `${slug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     }
 
     this.slug = slug;
 });
 
-postcardSchema.pre('save', function() {
+envelopeSchema.pre('save', function() {
     if (this.isModified('status') && this.status === 'sent' && !this.sentAt) {
         this.sentAt = new Date();
     }
 });
 
-const Postcard = mongoose.model('Postcard', postcardSchema);
+const Envelope = mongoose.model('Envelope', envelopeSchema);
 
-export default Postcard;
+export default Envelope;

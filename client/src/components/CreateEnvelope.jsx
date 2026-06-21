@@ -2,7 +2,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-export default function CreatePostcardForm ({ open, onClose }) {
+export default function CreateEnvelopeForm ({ open, onClose }) {
     const navigate = useNavigate()
     const [title, setTitle] = useState('')
     const [to, setTo] = useState('')
@@ -11,7 +11,7 @@ export default function CreatePostcardForm ({ open, onClose }) {
     if (!open) return null;
 
     function handleSubmit() {
-        navigate('/postcard/new', {
+        navigate('/envelope/new', {
             state: { title, to, from }
         })
     }
@@ -21,8 +21,8 @@ export default function CreatePostcardForm ({ open, onClose }) {
         <div className='fixed inset-0 flex justify-center items-center bg-black/50 z-50'>
             <div className="p-8 bg-amber-200 rounded-md w-[50%] flex-col space-y-10">
                 <div className="flex flex-col gap-2 w-full">
-                    <label className="text-orange-900 font-sans text-lg">Give a name to your postcard</label>
-                    <input className="border border-orange-900/50 outline-none p-2 rounded-md font-sans" type="text" name="title" placeholder="Postcard for Mother's day" onChange={(e) => setTitle(e.target.value)}/>
+                    <label className="text-orange-900 font-sans text-lg">Give a name to your envelope</label>
+                    <input className="border border-orange-900/50 outline-none p-2 rounded-md font-sans" type="text" name="title" placeholder="Letter for mom's birthday" onChange={(e) => setTitle(e.target.value)}/>
                 </div>
                 <div className="flex justify-between">
                     <div className="flex flex-col gap-2">

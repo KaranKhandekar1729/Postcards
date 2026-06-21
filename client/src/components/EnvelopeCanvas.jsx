@@ -4,9 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
 import Toolbar from "./Toolbar";
 import useFabricCanvas from "../hooks/useFabricCanvas";
-import '../styles/postcard.css';
+import '../styles/envelope.css';
 
-export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricData, postcardId, setPostcardId, activeCanvas, setActiveCanvas }) {
+export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricData, envelopeId, setEnvelopeId, activeCanvas, setActiveCanvas }) {
     const { state } = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated, loading } = useAuth()
@@ -249,41 +249,19 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         canvas.renderAll();
     }
 
-    const savePostCard = async (ref) => {
+    const saveEnvelope = async (ref) => {
         const canvas = ref?.current
         if (!canvas) return
-
-        const dataUrl = canvas.toDataURL({
-            format: 'webp',
-            quality: 0.7
-        })
-
-        const blob = await (await fetch(dataUrl)).blob();
-
-        const formData = new FormData();
-        formData.append('file', blob, 'thumbnail.webp');
-
-        const res = await fetch('http://localhost:3000/api/upload', {
-            method: 'POST',
-            body: formData
-        });
-
-        const uploadData = await res.json();
-
-        console.log('objects on canvas at save:', canvas.getObjects()); // add this
-        console.log('canvas JSON:', canvas.toJSON());                    // and this
-
 
         const payload = {
             title: state?.title,
             from: state?.from,
             to: state?.to,
-            thumbnail: uploadData.url,
             fabricData: canvas.toJSON()
         }
 
-        if (!postcardId) {
-            const res = await fetch('http://localhost:3000/api/postcards', {
+        if (!envelopeId) {
+            const res = await fetch('http://localhost:3000/api/envelope', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -292,10 +270,10 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
                 body: JSON.stringify(payload)
             })
             const data = await res.json();
-            setPostcardId(data.data._id)
-            navigate(`/postcard/edit/${data.data.slug}`, { replace: true });
+            setEnvelopeId(data.data._id)
+            navigate(`/envelope/edit/${data.data.slug}`, { replace: true });
         } else {
-            await fetch(`http://localhost:3000/api/postcards/${postcardId}`, {
+            await fetch(`http://localhost:3000/api/envelope/${envelopeId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -314,7 +292,7 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
             return
         }
 
-        await savePostCard()
+        await saveEnvelope()
     }
 
     useEffect(() => {
@@ -509,7 +487,7 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
                 onClose={() => setAuthOpen(false)}
                 onSuccess={async () => {
                     setAuthOpen(false)
-                    await savePostCard()
+                    await saveEnvelope()
                 }}
             />
         </>

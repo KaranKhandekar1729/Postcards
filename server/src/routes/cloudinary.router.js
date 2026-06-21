@@ -17,7 +17,7 @@ cloudinary.v2.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary.v2,
     params: {
-        folder: 'postcard-uploads',
+        folder: 'envelope-uploads',
         allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
         transformation: [{ width: 1000, crop: 'limit' }]
     },
