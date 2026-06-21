@@ -32,9 +32,10 @@ const envelopeSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+
     // Envelope design
     envelope: {
-        envelopeColor: {
+        color: {
             type: String,
             default: '#ffffff'
         },
@@ -43,9 +44,10 @@ const envelopeSchema = new mongoose.Schema({
             required: true,
         },
     },
+
     // Letter content/design
     letter: {
-        backgroundColor: {
+        color: {
             type: String,
             default: '#fffaf0'
         },
@@ -85,7 +87,7 @@ envelopeSchema.pre('save', async function () {
         .trim();
 
     const exisitingEnvelope = await mongoose
-        .model('Postcard')
+        .model('Envelope')
         .findOne({ slug });
 
     if (exisitingEnvelope && exisitingEnvelope._id.toString() !== this._id.toString()) {
