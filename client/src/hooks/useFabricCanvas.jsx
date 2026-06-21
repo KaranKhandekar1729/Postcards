@@ -12,7 +12,9 @@ export default function useFabricCanvas({
     setIsTextObj,
     setShowLayerOptions,
     setFontDropdownOpen,
-    setFontSizeDropdownOpen
+    setFontSizeDropdownOpen,
+    setFontSize,
+    setSelectedFont
 }) {
     useEffect(() => {
         if (fabricRef?.current) return
@@ -24,7 +26,7 @@ export default function useFabricCanvas({
         const canvas = new Canvas(canvasElRef.current, {
             width: width,
             height: height,
-            backgroundColor: '#fff'
+            backgroundColor: 'transparent'
         });
         canvas.renderAll();
         fabricRef.current = canvas;
@@ -43,32 +45,57 @@ export default function useFabricCanvas({
             obj.cornerSize = 8
             obj.transparentCorners = false
             obj.controls.mtr.visible = false
-
-            // Set state to true if object is of text type~
-            if (canvas.getActiveObject().type === 'i-text') setIsTextObj(true)
-
+            obj.flipX = false
+            obj.flipY = false
+            obj.originX = 'left'
+            obj.originY = 'top'
+            
             const rect = obj.getBoundingRect();
+
+            if (obj.type === 'textbox') {
+                setIsTextObj(true)
+
+                obj.controls.mt.visible = false
+                obj.controls.mb.visible = false
+
+                setToolbarPos({
+                    visible: true,
+                    x: rect.left + canvas.width/8,
+                    y: rect.top - 80,
+                });
+            }
 
             setToolbarPos({
                 visible: true,
                 x: rect.left + canvas.width/4,
                 y: rect.top - 80,
             });
+
         };
         
         canvas.on("selection:created", () => {
+            const obj = canvas.getActiveObject()
             setActiveCanvas(canvasName)
             otherFabricRef.current?.discardActiveObject()
             otherFabricRef.current?.renderAll()
             updateToolbar()
+            if (!obj || obj.type !== 'textbox' ) return
+            console.log(obj.fontFamily)
+            setFontSize(obj.fontSize ?? 40)
+            setSelectedFont(obj.fontFamily ?? 'Arial')
         });
 
         canvas.on("selection:updated", () => {
+            const obj = canvas.getActiveObject()
             setActiveCanvas(canvasName)
             setShowLayerOptions(false)
             setFontDropdownOpen(false)
             setFontSizeDropdownOpen(false)
             updateToolbar()
+            if (!obj || obj.type !== 'textbox' ) return
+            console.log(obj.fontFamily)
+            setFontSize(obj.fontSize ?? 40)
+            setSelectedFont(obj.fontFamily ?? 'Arial')
         });
 
         canvas.on("selection:cleared", () => {
@@ -78,6 +105,8 @@ export default function useFabricCanvas({
             setShowLayerOptions(false)
             setFontDropdownOpen(false)
             setFontSizeDropdownOpen(false)
+            setFontSize(40)
+            setSelectedFont('Arial')
         }); 
 
         canvas.on("object:moving", updateToolbar);

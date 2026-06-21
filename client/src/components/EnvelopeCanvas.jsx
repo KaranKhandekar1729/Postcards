@@ -6,7 +6,7 @@ import Toolbar from "./Toolbar";
 import useFabricCanvas from "../hooks/useFabricCanvas";
 import '../styles/envelope.css';
 
-export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricData, envelopeId, setEnvelopeId, activeCanvas, setActiveCanvas }) {
+export default function CardCanvas({ envelopeFabricRef, letterFabricRef, envelopeData, envelopeId, setEnvelopeId, activeCanvas, setActiveCanvas }) {
     const { state } = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated, loading } = useAuth()
@@ -77,43 +77,6 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         }
     }
 
-    const [isFlipped, setIsFlipped] = useState(false)
-    const [isOpen, setIsOpen] = useState(false)
-    const [letterState, setLetterState] = useState('idle')
-
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    const handleEnvelopeOpen = async () => { 
-        if (!isFlipped) return
-
-        if (!isOpen && (letterState === 'idle')) {
-            // OPEN flap
-            setIsOpen(true) 
-            await sleep(1200)
-    
-            setLetterState('removing')
-            await sleep(600)
-            setIsOpen(false)
-            await sleep(2500)
-            setLetterState('opened')
-        } else {
-            // CLOSE flap
-            setToolbarPos(prev => ({...prev, visible: false}))
-            letterFabricRef.current?.discardActiveObject()
-            letterFabricRef.current?.renderAll()
-            setActiveCanvas(null)
-            setLetterState('closed')
-            await sleep(2000)
-            setIsOpen(true)
-            await sleep(1200)
-            setLetterState('returning')
-            await sleep(1200)
-            setIsOpen(false)
-            await sleep(200)        
-            setLetterState('idle')
-        }
-    }
-
     const fontOptions = [
         { label: 'Arial', value: 'Arial', url: null },
         { label: 'Times New Roman', value: 'TimesNewRoman', url: null },
@@ -122,6 +85,13 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         { label: 'Shadows Into Light', value: 'ShadowsIntoLight', googleFont: true },
         { label: 'Adversecase', value: 'Adversecase', url: 'https://res.cloudinary.com/docidcbkt/raw/upload/v1781364541/liypsjxnxyjxpmvrcur3.woff2' }
     ]
+
+    const resolveFontValue = (fontFamily) => {
+        const match = fontOptions.find(
+            f => f.label === fontFamily || f.value === fontFamily
+        ); 
+        return match ? match.value : 'Arial'
+    }
 
     const fontSizeOptions = [12, 14, 16, 18, 20, 24, 30, 36, 40, 48, 56, 64]
 
@@ -136,7 +106,9 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         setIsTextObj,
         setShowLayerOptions,
         setFontDropdownOpen,
-        setFontSizeDropdownOpen
+        setFontSizeDropdownOpen,
+        setSelectedFont: (fontFamily) => setSelectedFont(resolveFontValue(fontFamily)),
+        setFontSize
     })
 
     useFabricCanvas({
@@ -150,7 +122,9 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         setIsTextObj,
         setShowLayerOptions,
         setFontDropdownOpen,
-        setFontSizeDropdownOpen
+        setFontSizeDropdownOpen,
+        setFontSize,
+        setSelectedFont
     })
 
     // DELETE OBJECT FUNCTION
@@ -266,10 +240,13 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         const obj = canvas?.getActiveObject();
         if (!obj) return;
 
-        obj.set({
-            fontWeight: 'Bold'
-        })
-
+        if (obj.fontWeight === 'Bold') {
+            obj.set({ fontWeight: 'Normal' })
+            canvas.renderAll()
+            return
+        }
+        
+        obj.set({ fontWeight: 'Bold' })
         canvas.renderAll();
     }
 
@@ -286,15 +263,21 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
         canvas.renderAll();
     }
 
-    const saveEnvelope = async (ref) => {
-        const canvas = ref?.current
-        if (!canvas) return
+    const saveEnvelope = async (envelopeFabricRef, letterFabricRef) => {
+        const envelopeFabric = envelopeFabricRef?.current
+        const letterFabric = letterFabricRef?.current
 
         const payload = {
             title: state?.title,
             from: state?.from,
             to: state?.to,
-            fabricData: canvas.toJSON()
+            envelope: { 
+                fabricData: envelopeFabric?.toJSON()
+            },
+            letter: {
+                color: '#fdf6d3',
+                fabricData: letterFabric?.toJSON()
+            }
         }
 
         if (!envelopeId) {
@@ -329,29 +312,46 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
             return
         }
 
-        await saveEnvelope()
+        await saveEnvelope(envelopeFabricRef, letterFabricRef)
     }
 
     useEffect(() => {
-        const canvas = envelopeFabricRef.current;
-        if (!canvas || !fabricData) return;
+        const envelopeCanvas = envelopeFabricRef.current;
+        const letterCanvas = letterFabricRef.current;
+
+        if (!envelopeCanvas || !letterCanvas) return;
+        if (!envelopeData?.envelope?.fabricData) return;
+        if (!envelopeData?.letter?.fabricData) return;
 
         const loadCanvas = async () => {
+
+            
             try {
-                const json =
-                    typeof fabricData === "string"
-                        ? JSON.parse(fabricData)
-                        : fabricData;
                 await preloadFonts()        
-                await canvas.loadFromJSON(json);
-                canvas.renderAll();
+                console.log(envelopeData)
+                const envelopeFabricJson =
+                typeof envelopeData?.envelope?.fabricData === "string"
+                ? JSON.parse(envelopeData?.envelope?.fabricData)
+                : envelopeData?.envelope?.fabricData;
+                console.log("envelope fabric", envelopeFabricJson)
+
+                const letterFabricJson =
+                    typeof envelopeData?.letter?.fabricData === "string"
+                    ? JSON.parse(envelopeData?.letter?.fabricData)
+                    : envelopeData?.letter?.fabricData;
+
+                console.log("letter fabric json", letterFabricJson)
+                await envelopeCanvas.loadFromJSON(envelopeFabricJson);
+                envelopeCanvas.renderAll();
+                await letterCanvas.loadFromJSON(letterFabricJson);
+                letterCanvas.renderAll();
             } catch (err) {
                 console.error("Error loading fabric JSON:", err);
             }
         };
 
         setTimeout(loadCanvas, 0);
-    }, [fabricData]);
+    }, [envelopeData]);
 
 
     const handleEnvelopeFlip = () => {
@@ -430,17 +430,26 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
                         {/* Letter */}
                         <div
                             ref={letterFoldRef}
-                            className={`absolute bg-[#fdf6d3] 
-                                shadow-lg border border-[#ccccccb7] 
+                            className={`shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)] absolute bg-(--letter-color)
+                                bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
+                                bg-cover bg-no-repeat
+                                border border-y-0 border-black/10
                                 w-11/12 h-[160px] xs:h-[210px] sm:h-[240px] md:w-[550px] md:h-[230px] lg:h-[250px] xl:h-[280px] top-8 md:top-15 z-10
                                 left-2/4 md:right-2/4 -translate-x-2/4  perspective-distant 
-                                before:content-[''] before:bg-[#fdf6d3] 
-                                before:border before:border-[#ccccccb7] 
+                                before:content-[''] before:bg-(--letter-color)
+                                before:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)]
+                                before:bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
+                                before:bg-cover before:bg-no-repeat
+                                before:border before:border-t-0 before:border-black/10
                                 before:absolute before:h-3/4 before:w-full 
                                 before:origin-top 
                                 before:transform-3d after:content-['']
-                                after:bg-[#fdf6d3] after:border 
-                                after:border-[#ccccccb7] after:bottom-0 
+                                after:bg-(--letter-color)
+                                after:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)]
+                                after:bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
+                                after:bg-cover after:bg-no-repeat
+                                after:border after:border-b-0 after:border-black/10
+                                after:bottom-0 
                                 after:origin-bottom 
                                 after:absolute after:h-3/4 after:w-full 
                                 after:transform-3d
@@ -450,31 +459,11 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, fabricD
                                 ${ letterState === 'returning' ? 'letter-return': ''}
                                 ${ letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 -top-1! before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' }
                                 ${ letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' } 
-                            `}>
-                                <canvas ref={letterCanvasRef} />
-                                {(toolbarPos.visible && activeCanvas === 'letter') && (
-                                    <Toolbar
-                                        fabricRef={letterFabricRef}
-                                        toolbarPos={toolbarPos}
-                                        isTextObj={isTextObj}
-                                        updateFontFamily={updateFontFamily}
-                                        updateFontSize={updateFontSize}
-                                        updateFontWeight={updateFontWeight}
-                                        fontOptions={fontOptions}
-                                        selectedFont={selectedFont}
-                                        fontSizeOptions={fontSizeOptions}
-                                        fontDropdownOpen={fontDropdownOpen}
-                                        setFontDropdownOpen={setFontDropdownOpen}
-                                        fontSize={fontSize}
-                                        fontSizeDropdownOpen={fontSizeDropdownOpen}
-                                        setFontSizeDropdownOpen={setFontSizeDropdownOpen}
-                                        duplicate={duplicate}
-                                        deleteSelected={deleteSelected}
-                                        showLayerOptions={showLayerOptions}
-                                        setShowLayerOptions={setShowLayerOptions}
-                                        setLayerPosition={setLayerPosition}
-                                    />
-                                )}
+                            `}
+                            style={{
+                                "--letter-color": envelopeData?.letter?.color
+                            }}
+                            >
                         </div>
                         <div 
                             ref={letterRef}

@@ -35,7 +35,11 @@ export default function Toolbar({
                         <div className="px-2 py-1 bg-[#cccccc50] hover:bg-gray-100 rounded-md">
                             <div className="relative">
                                 <button
-                                    onClick={() => setFontDropdownOpen(v => !v)}
+                                    onClick={() => {
+                                        setShowLayerOptions(false)
+                                        setFontSizeDropdownOpen(false)
+                                        setFontDropdownOpen((prev) => !prev)
+                                    }}
                                     className="text-sm max-w-[50px] sm:min-w-[150px] flex justify-between items-center cursor-pointer"
                                     style={{ fontFamily: fontOptions.find(f => f.value === selectedFont)?.label }}
                                 >
@@ -65,14 +69,18 @@ export default function Toolbar({
                         <div className="px-2 py-1 bg-[#cccccc50] hover:bg-gray-100 rounded-md">
                             <div className="relative">
                                 <button
-                                    onClick={() => setFontSizeDropdownOpen(v => !v)} 
+                                    onClick={() => { 
+                                        setFontDropdownOpen(false)
+                                        setShowLayerOptions(false)
+                                        setFontSizeDropdownOpen((prev) => !prev)
+                                    }} 
                                     className="text-sm flex justify-between items-center gap-2"
                                 >    
                                     <p>{fontSize}</p>
                                     <span><ChevronDown size="15" /></span>
                                 </button>
                                 {fontSizeDropdownOpen && (
-                                    <div className="absolute top-8 bg-white rounded-lg shadow-lg border border-gray-100 z-50 overflow-x-scroll max-h-[150px]">
+                                    <div className="absolute top-8 bg-white rounded-lg shadow-lg border border-gray-100 z-50 overflow-y-scroll scrollbar-thin max-h-[150px]">
                                         {fontSizeOptions.map((fontSize, i) => (
                                             <div
                                                 key={i}
@@ -113,7 +121,11 @@ export default function Toolbar({
                 </button>
 
                 <button
-                    onClick={() => setShowLayerOptions((prev) => !prev)}
+                    onClick={() => {
+                        setFontDropdownOpen(false)
+                        setFontSizeDropdownOpen(false)
+                        setShowLayerOptions((prev) => !prev)
+                    }}
                     className="relative px-2 py-1 hover:bg-gray-100 rounded"
                 >
                     <Layers size="20" />

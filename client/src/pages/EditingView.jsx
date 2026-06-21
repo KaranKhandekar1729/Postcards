@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FabricImage, IText } from "fabric";
+import { FabricImage, Textbox } from "fabric";
 import Sidebar from "../components/Sidebar";
 import EnvelopeCanvas from "../components/EnvelopeCanvas";
 
@@ -30,7 +30,7 @@ export default function EditingView() {
     const addText = (canvas) => {
         console.log("Clicked addText")
         console.log(canvas)
-        const text = new IText("Hello", {
+        const text = new Textbox("Hello", {
             fontFamily: "Arial",
             fill: "#000",
             editable: true,
@@ -65,7 +65,7 @@ export default function EditingView() {
 
         const getEnvelope = async () => {
             const res = await fetch(
-                `http://localhost:3000/api/envelopes/${slug}`, {
+                `http://localhost:3000/api/envelope/${slug}`, {
                     credentials: 'include'
                 }
             );
@@ -93,7 +93,7 @@ export default function EditingView() {
             <EnvelopeCanvas
                 envelopeFabricRef={envelopeFabricRef}
                 letterFabricRef={letterFabricRef}
-                fabricData={envelope?.fabricData}
+                envelopeData={envelope}
                 envelopeId={envelopeId}
                 setEnvelopeId={setEnvelopeId}
                 activeCanvas={activeCanvas}
