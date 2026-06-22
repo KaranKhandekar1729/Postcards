@@ -6,7 +6,7 @@ import Toolbar from "./Toolbar";
 import useFabricCanvas from "../hooks/useFabricCanvas";
 import '../styles/envelope.css';
 
-export default function CardCanvas({ envelopeFabricRef, letterFabricRef, envelopeData, envelopeId, setEnvelopeId, activeCanvas, setActiveCanvas }) {
+export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRef, letterFabricRef, envelopeData, envelopeId, setEnvelopeId, activeCanvas, setActiveCanvas }) {
     const { state } = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated, loading } = useAuth()
@@ -76,15 +76,6 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, envelop
             setLetterState('idle')
         }
     }
-
-    const fontOptions = [
-        { label: 'Arial', value: 'Arial', url: null },
-        { label: 'Times New Roman', value: 'TimesNewRoman', url: null },
-        { label: 'Cedarville Cursive', value: 'CedarvilleCursive', googleFont: true },
-        { label: 'Instrument Serif', value: 'InstrumentSerif', googleFont: true },
-        { label: 'Shadows Into Light', value: 'ShadowsIntoLight', googleFont: true },
-        { label: 'Adversecase', value: 'Adversecase', url: 'https://res.cloudinary.com/docidcbkt/raw/upload/v1781364541/liypsjxnxyjxpmvrcur3.woff2' }
-    ]
 
     const resolveFontValue = (fontFamily) => {
         const match = fontOptions.find(
@@ -195,18 +186,7 @@ export default function CardCanvas({ envelopeFabricRef, letterFabricRef, envelop
         setShowLayerOptions(false)
     };
 
-    const preloadFonts = async () => {
-        const customFonts = fontOptions.filter(fontOption => fontOption.url)
-        await Promise.all(customFonts.map(async font => {
-            if (font.url) {
-                const fontFace = new FontFace(font.value, `url(${font.url})`)
-                await fontFace.load()
-                document.fonts.add(fontFace)
-            } else if (font.googleFont) {
-                await document.fonts.load(`16px "${font.label}"`)
-            }
-        }))
-    }
+    
 
     const updateFontFamily = async (fontValue, ref) => {
         const selected = fontOptions.find(f => f.value === fontValue)
