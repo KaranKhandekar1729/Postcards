@@ -19,25 +19,31 @@ export default function CreateEnvelopeForm ({ open, onClose }) {
     return (
         createPortal(
         <div className='fixed inset-0 flex justify-center items-center bg-black/50 z-50'>
-            <div className="p-8 bg-amber-200 rounded-md w-[50%] flex-col space-y-10">
+            <div className="p-6 sm:p-8 bg-amber-200 rounded-md w-[90%] sm:w-fit flex-col space-y-10">
                 <div className="flex flex-col gap-2 w-full">
-                    <label className="text-orange-900 font-sans text-lg">Give a name to your envelope</label>
-                    <input className="border border-orange-900/50 outline-none p-2 rounded-md font-sans" type="text" name="title" placeholder="Letter for mom's birthday" onChange={(e) => setTitle(e.target.value)}/>
+                    <label className="text-red-900 font-advercase text-lg">Give a name to your envelope</label>
+                    <input 
+                        className="border border-orange-900/50 focus:outline-2 focus:outline-red-900 p-3 rounded-md font-advercase placeholder:text-red-900/50 text-red-900"
+                        type="text" name="title"
+                        autoFocus="true" 
+                        placeholder="Letter for mom's birthday" 
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-col gap-8 sm:flex-row justify-between">
                     <div className="flex flex-col gap-2">
-                        <label className="text-orange-900">To</label>
-                        <input className="border border-orange-900/50 outline-none p-2 rounded-md font-sans" type="text" name="to" placeholder="Receiver's name" onChange={(e) => setTo(e.target.value)}/>
+                        <label className="text-red-900 font-advercase text-lg">To</label>
+                        <input className="border border-orange-900/50 focus:outline-2 focus:outline-red-900 p-3 rounded-md font-advercase placeholder:text-red-900/50 text-red-900" type="text" name="to" placeholder="Receiver's name" onChange={(e) => setTo(e.target.value)}/>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <label className="text-orange-900">From</label>
-                        <input className="border border-orange-900/50 outline-none p-2 rounded-md font-sans" type="text" name="from" placeholder="Your name" onChange={(e) => setFrom(e.target.value)}/>
+                        <label className="text-red-900 font-advercase text-lg">From</label>
+                        <input className="border border-orange-900/50 focus:outline-2 focus:outline-red-900 p-3 rounded-md font-advercase placeholder:text-red-900/50 text-red-900" type="text" name="from" placeholder="Your name" onChange={(e) => setFrom(e.target.value)}/>
                     </div>
                 </div>
 
                 <div className='flex justify-end gap-2 mt-2'>
-                    <button onClick={onClose} className='px-4 py-2 rounded-md text-orange-900 hover:bg-orange-300 transition-all'>Cancel</button>
-                    <button onClick={handleSubmit} className='px-4 py-2 rounded-md bg-amber-800 text-amber-300 hover:bg-yellow-400 hover:text-orange-900 transition-all'>Next</button>
+                    <button onClick={onClose} className='px-4 py-2 rounded-md font-advercase text-red-900/50 hover:text-red-900 cursor-pointer transition-all duration-300'>Cancel</button>
+                    <button onClick={handleSubmit} className='px-4 py-2 rounded-md font-advercase bg-red-900/90 cursor-pointer text-orange-300 hover:bg-red-900 hover:text-amber-300 transition-all duration-300'>Next</button>
                 </div>
             </div>
         </div>,

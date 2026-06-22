@@ -4,7 +4,7 @@ import { FabricImage, Textbox } from "fabric";
 import Sidebar from "../components/Sidebar";
 import EnvelopeCanvas from "../components/EnvelopeCanvas";
 
-export default function EditingView() {
+export default function EditingView({ fontOptions, preloadFonts }) {
     const [isUploading, setIsUploading] = useState(false);
     const envelopeFabricRef = useRef(null);
     const letterFabricRef = useRef(null);
@@ -91,6 +91,8 @@ export default function EditingView() {
             />
 
             <EnvelopeCanvas
+                fontOptions={fontOptions}
+                preloadFonts={preloadFonts}
                 envelopeFabricRef={envelopeFabricRef}
                 letterFabricRef={letterFabricRef}
                 envelopeData={envelope}
