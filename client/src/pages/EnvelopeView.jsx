@@ -1,3 +1,4 @@
+import { FlipHorizontal } from 'lucide-react'
 import Envelope from '../components/Envelope'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
@@ -63,28 +64,31 @@ export default function EnvelopeView({ preloadFonts }) {
         }
     }
 
-
   return (
-    <>
+    <div className="perspective-distant h-screen overflow-hidden flex flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
+        <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
+
         <Envelope
             preloadFonts={preloadFonts}
             isFlipped={isFlipped}
             isOpen={isOpen}
             letterState={letterState}
             envelopeData={envelopeData}
+            handleEnvelopeOpen={handleEnvelopeOpen}
         />
-        <div className="relative top-[85px] flex gap-3">
-            <button
-                onClick={handleEnvelopeFlip}
-                className='bg-white p-4 w-[100px] lg:w-32 cursor-pointer'
-            >
-                Flip
-            </button>
-            { isFlipped &&
-                <button onClick={() => handleEnvelopeOpen()} className='bg-white p-4 w-[100px]'>{letterState === "opened" ? 'Close' : 'Open'}</button>
-            }
-        </div>
-    </>
-    
+
+        { (!isOpen && letterState === 'idle') && (
+                <div className="absolute top-2 right-2 flex gap-3">
+                    <button
+                        onClick={handleEnvelopeFlip}
+                        className='bg-amber-300 flex gap-4 justify-center hover:bg-red-950 font-bold text-red-950 hover:text-amber-300 p-2 px-4 rounded-sm w-fit lg:w-32 cursor-pointer transition-all duration-300'
+                    >
+                        Flip
+                        <FlipHorizontal /> 
+                    </button>
+                </div>
+            )
+        }
+    </div>  
   )
 }
