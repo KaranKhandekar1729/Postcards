@@ -9,7 +9,6 @@ export default function AuthModal({ open, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
 
   const usernameRef = useRef()
-  const emailRef = useRef()
   const passwordRef = useRef()
 
   if (!open) return null
@@ -19,9 +18,9 @@ export default function AuthModal({ open, onClose, onSuccess }) {
     setLoading(true)
     try {
       if (!isLogin) {
-        await register(usernameRef.current.value, emailRef.current.value, passwordRef.current.value)
+        await register(usernameRef.current.value, passwordRef.current.value)
       } else {
-        await login(emailRef.current.value, passwordRef.current.value)
+        await login(usernameRef.current.value, passwordRef.current.value)
       }
       onSuccess()
     } catch (err) {
@@ -67,17 +66,6 @@ export default function AuthModal({ open, onClose, onSuccess }) {
               />
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-medium text-stone-600 mb-1.5">Email</label>
-            <input
-              ref={emailRef}
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
-            />
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-stone-600 mb-1.5">Password</label>

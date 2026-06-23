@@ -13,13 +13,12 @@ export default function SignUp() {
     e.preventDefault();
     const data = new FormData(e.target);
     const username = data.get('username');
-    const email = data.get('email');
     const password = data.get('password');
 
     setError('');
     setLoading(true);
     try {
-      await register(username, email, password);
+      await register(username, password);
       navigate('/envelope/new');
     } catch (err) {
       setError(err.message);
@@ -57,19 +56,7 @@ export default function SignUp() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-stone-600 mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
-            />
-          </div>
-
+        
           <div>
             <label className="block text-sm font-medium text-stone-600 mb-1.5">
               Password
