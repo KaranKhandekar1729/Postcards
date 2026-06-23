@@ -85,14 +85,11 @@ envelopeSchema.pre('save', async function () {
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim();
+    
+    const bytes = crypto.getRandomValues(new Uint8Array(16))
+    const token = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
 
-    const exisitingEnvelope = await mongoose
-        .model('Envelope')
-        .findOne({ slug });
-
-    if (exisitingEnvelope && exisitingEnvelope._id.toString() !== this._id.toString()) {
-        slug = `${slug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    }
+    slug = `${slug}-${token}`
 
     this.slug = slug;
 });

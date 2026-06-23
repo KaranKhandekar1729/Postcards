@@ -19,7 +19,7 @@ function App() {
   ]
 
   const preloadFonts = async () => {
-    const customFonts = fontOptions.filter(fontOption => fontOption.url)
+    const customFonts = fontOptions.filter(fontOption => fontOption.url || fontOption.googleFont)
     await Promise.all(customFonts.map(async font => {
         if (font.url) {
             const fontFace = new FontFace(font.value, `url(${font.url})`)
