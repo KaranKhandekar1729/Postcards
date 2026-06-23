@@ -47,8 +47,6 @@ export default function useFabricCanvas({
             obj.controls.mtr.visible = false
             obj.flipX = false
             obj.flipY = false
-            obj.originX = 'left'
-            obj.originY = 'top'
             
             const rect = obj.getBoundingRect();
 
@@ -63,13 +61,13 @@ export default function useFabricCanvas({
                     x: rect.left + canvas.width/8,
                     y: rect.top - 80,
                 });
+            } else {
+                setToolbarPos({
+                    visible: true,
+                    x: rect.left + canvas.width/4,
+                    y: rect.top - 80,
+                });
             }
-
-            setToolbarPos({
-                visible: true,
-                x: rect.left + canvas.width/4,
-                y: rect.top - 80,
-            });
 
         };
         
