@@ -74,10 +74,10 @@ export default function Toolbar({
                                         setShowLayerOptions(false)
                                         setFontSizeDropdownOpen((prev) => !prev)
                                     }} 
-                                    className="text-sm flex justify-between items-center gap-2"
+                                    className="text-sm flex justify-between cursor-pointer items-center gap-2"
                                 >    
-                                    <p>{fontSize}</p>
-                                    <span><ChevronDown size="15" /></span>
+                                    <p className="text-[10px] sm:text-base">{fontSize}</p>
+                                    <span><ChevronDown size="15" className="cursor-pointer" /></span>
                                 </button>
                                 {fontSizeDropdownOpen && (
                                     <div className="absolute top-8 bg-white rounded-lg shadow-lg border border-gray-100 z-50 overflow-y-scroll scrollbar-thin max-h-[150px]">
@@ -99,23 +99,25 @@ export default function Toolbar({
                         </div>
                     <button
                         onClick={() => updateFontWeight(fabricRef)}
-                        className="px-2 py-1 hover:bg-gray-100 rounded-md"
+                        className="px-2 py-1 hover:bg-gray-100 rounded-md cursor-pointer"
                     >
                         <Bold size="20" />
                     </button>
                 </div>
             )}
-            <div>
+            <div className="flex items-center">
                 <button
                     onClick={() => duplicate(fabricRef)}
-                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                    className="px-2 py-1 hover:bg-gray-100 rounded cursor-pointer"
+                    title="duplicate"
                 >
                     <Copy size="20" />
                 </button>
 
                 <button
                     onClick={() => deleteSelected(fabricRef)}
-                    className="px-2 py-1 hover:bg-gray-100 rounded"
+                    className="px-2 py-1 hover:bg-gray-100 rounded cursor-pointer"
+                    title="delete"
                 >
                     <Trash size="20" />
                 </button>
@@ -126,7 +128,8 @@ export default function Toolbar({
                         setFontSizeDropdownOpen(false)
                         setShowLayerOptions((prev) => !prev)
                     }}
-                    className="relative px-2 py-1 hover:bg-gray-100 rounded"
+                    className="relative px-2 py-1 hover:bg-gray-100 rounded cursor-pointer"
+                    title="position"
                 >
                     <Layers size="20" />
                 </button>
@@ -136,8 +139,8 @@ export default function Toolbar({
                     className="absolute top-11 right-0 p-1 bg-white flex flex-col gap-1 shadow-md rounded-lg"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div onClick={() => setLayerPosition('front', fabricRef)} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Bring to Front</div>
-                    <div onClick={() => setLayerPosition('back', fabricRef)} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md">Send to Back</div>
+                    <div onClick={() => setLayerPosition('front', fabricRef)} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md cursor-pointer">Bring to Front</div>
+                    <div onClick={() => setLayerPosition('back', fabricRef)} className="hover:bg-gray-100 p-2 text-slate-800 rounded-md cursor-pointer">Send to Back</div>
                 </div>
             )}
         </div>

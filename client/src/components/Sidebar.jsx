@@ -11,10 +11,11 @@ export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeF
                     <button 
                         onClick={() => onAddText(fabricRef?.current)}
                         className="rounded-md cursor-pointer text-[2rem] font-bold text-white"
+                        title="Add text"
                     >
                             T
                     </button>
-                    <label className="rounded text-sm cursor-pointer flex items-center">
+                    <label title="Add an image" className="rounded text-sm cursor-pointer flex items-center">
                         { isUploading ? (
                                 <div className="w-fit h-fit animate-spin">
                                     <div className="w-8 h-8 rounded-full bg-linear-to-br from-yellow-400 to-transparent"></div>
@@ -30,8 +31,9 @@ export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeF
                         />
                     </label>
                     <button
-                        onClick={openShareModal}
+                        onClick={() => openShareModal()}
                         className="cursor-pointer"
+                        title="Share"
                     >
                         <Share2 size="32" color="white" />
                     </button>

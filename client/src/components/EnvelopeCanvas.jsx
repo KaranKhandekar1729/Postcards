@@ -290,7 +290,7 @@ export default function CardCanvas({
                 </div>
 
                 {/* Front */}
-                <div onClick={() => handleEnvelopeOpen()} className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
+                <div onClick={() => { letterState === 'idle' && handleEnvelopeOpen();}} className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180 cursor-pointer">
 
                     <div className={`absolute left-2/4 right-2/4 top-2/4 -translate-x-2/4 z-[31] animate-bounce -rotate-10 transition-opacity duration-300
                             ${!isOpen && letterState === 'idle' ? 'opacity-100' : 'opacity-0'}
@@ -314,14 +314,12 @@ export default function CardCanvas({
                     <div
                         ref={letterFoldRef}
                         className={`shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)] absolute bg-(--letter-color)
-                                bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 bg-cover bg-no-repeat
                                 border border-y-0 border-black/10
                                 w-11/12 h-[160px] xs:h-[210px] sm:h-[240px] md:w-[550px] md:h-[230px] lg:h-[250px] xl:h-[280px] top-8 md:top-15 z-10
                                 left-2/4 md:right-2/4 -translate-x-2/4  perspective-distant 
                                 before:content-[''] before:bg-(--letter-color)
                                 before:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)]
-                                before:bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 before:bg-cover before:bg-no-repeat
                                 before:border before:border-t-0 before:border-black/10
                                 before:absolute before:h-3/4 before:w-full 
@@ -329,7 +327,6 @@ export default function CardCanvas({
                                 before:transform-3d after:content-['']
                                 after:bg-(--letter-color)
                                 after:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)]
-                                after:bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 after:bg-cover after:bg-no-repeat
                                 after:border after:border-b-0 after:border-black/10
                                 after:bottom-0 
@@ -362,7 +359,7 @@ export default function CardCanvas({
                     >
                         <canvas ref={letterCanvasRef} />
                         {isFlipped &&
-                            <button onClick={() => handleEnvelopeOpen()} className={`absolute top-2 p-2 w-6 h-6 flex items-center justify-center sm:w-9 sm:h-9 right-2 bg-gray-300/70 border-2 border-black/20 rounded-full
+                            <button onClick={() => handleEnvelopeOpen()} className={`absolute top-2 p-2 w-6 h-6 flex items-center justify-center sm:w-9 sm:h-9 right-2 bg-white/30 border-2 border-black/20 cursor-pointer rounded-full
                                     ${letterState === 'opened' ? 'visible' : 'invisible'}    
                                 `}>
                                 <span className="text-black/30 font-bold">&#10005;</span>
