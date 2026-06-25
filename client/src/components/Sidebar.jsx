@@ -1,11 +1,13 @@
-export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeFabricRef, letterFabricRef, activeCanvas }) {
+import { Share2 } from "lucide-react"
+
+export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeFabricRef, letterFabricRef, activeCanvas, openShareModal }) {
 
     const fabricRef = activeCanvas === 'envelope' ? envelopeFabricRef : letterFabricRef
 
     return (
         <>
-            <div className="w-full h-13 lg:w-15 lg:h-full bg-yellow-950 border-t-2 border-t-yellow-900 lg:border-r-2 lg:border-t-0 lg:border-r-yellow-900">
-                <div className="flex flex-row lg:flex-col gap-12 lg:gap-4 flex-1 justify-center items-center">
+            <div className="w-full h-13 lg:w-15 lg:h-full bg-red-950 border-t-2 border-t-yellow-900 lg:border-r-2 lg:border-t-0 lg:border-r-yellow-900">
+                <div className="flex flex-row lg:flex-col gap-12 lg:gap-6 flex-1 justify-center items-center">
                     <button 
                         onClick={() => onAddText(fabricRef?.current)}
                         className="rounded-md cursor-pointer text-[2rem] font-bold text-white"
@@ -27,6 +29,12 @@ export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeF
                             className="hidden"
                         />
                     </label>
+                    <button
+                        onClick={openShareModal}
+                        className="cursor-pointer"
+                    >
+                        <Share2 size="32" color="white" />
+                    </button>
                 </div>
             </div>
         </>

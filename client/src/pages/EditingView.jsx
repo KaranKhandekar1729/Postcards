@@ -5,6 +5,7 @@ import { FabricImage, Textbox } from "fabric";
 import Sidebar from "../components/Sidebar";
 import AuthModal from "../components/AuthModal";
 import EnvelopeCanvas from "../components/EnvelopeCanvas";
+import ShareModal from "../components/ShareModal";
 import { FlipHorizontal, Save } from "lucide-react";
 
 export default function EditingView({ fontOptions, preloadFonts }) {
@@ -20,6 +21,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
     const [toolbarPos, setToolbarPos] = useState({ x: 0, y: 0, visible: false });
     const [authOpen, setAuthOpen] = useState(false)
     const [saveStatus, setSaveStatus] = useState('idle')
+    const [openShareModal, setOpenShareModal] = useState(false)
 
     const navigate = useNavigate();
     const { slug } = useParams();
@@ -207,6 +209,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 envelopeFabricRef={envelopeFabricRef}
                 letterFabricRef={letterFabricRef}
                 activeCanvas={activeCanvas}
+                openShareModal={() => setOpenShareModal(true)}
             />
 
             <div className="perspective-distant h-screen flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
@@ -255,6 +258,12 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                         </div>
                     )
                 }
+                { openShareModal && (
+                    <ShareModal
+                        openShareModal={openShareModal}
+                        onClose={() => setOpenShareModal(false)}
+                    />
+                )}  
                 <AuthModal
                 open={authOpen}
                 onClose={() => setAuthOpen(false)}
