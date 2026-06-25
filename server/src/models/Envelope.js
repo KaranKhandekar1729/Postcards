@@ -39,10 +39,7 @@ const envelopeSchema = new mongoose.Schema({
             type: String,
             default: '#ffffff'
         },
-        fabricData: {
-            type: Object,
-            required: true,
-        },
+        fabricData: Object
     },
 
     // Letter content/design
@@ -51,27 +48,8 @@ const envelopeSchema = new mongoose.Schema({
             type: String,
             default: '#fffaf0'
         },
-        fabricData: {
-            type: Object,
-            required: true,
-        },
-    },
-
-    status: {
-        type: String,
-        enum: ['draft', 'sent', 'scheduled'],
-        default: 'draft',
-    },
-
-    sentAt: {
-        type: Date,
-        default: null
-    },
-
-    scheduledFor: {
-        type: Date,
-        default: null,
-    },
+        fabricData: Object
+    }
 }, {
     timestamps: true
 });
@@ -92,12 +70,6 @@ envelopeSchema.pre('save', async function () {
     slug = `${slug}-${token}`
 
     this.slug = slug;
-});
-
-envelopeSchema.pre('save', function() {
-    if (this.isModified('status') && this.status === 'sent' && !this.sentAt) {
-        this.sentAt = new Date();
-    }
 });
 
 const Envelope = mongoose.model('Envelope', envelopeSchema);

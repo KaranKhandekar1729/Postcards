@@ -10,13 +10,15 @@ export default function EnvelopeView({ preloadFonts }) {
     const [envelopeData, setEnvelopeData] = useState(null)
     const {slug} = useParams()
 
+    const API_URL = import.meta.env.VITE_API_URL
+
     // fetch envelope
     useEffect(() => {
         if (!slug) return;
 
         const getEnvelopeData = async () => {
             const res = await fetch(
-                `http://localhost:3000/api/envelope/${slug}`, {
+                `${API_URL}/api/envelope/${slug}`, {
                     credentials: 'include'
                 }
             );
@@ -65,7 +67,7 @@ export default function EnvelopeView({ preloadFonts }) {
     }
 
   return (
-    <div className="perspective-distant h-screen overflow-hidden flex flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
+    <div className="transition-opacity duration-1000 animate-fade-in perspective-distant h-screen overflow-hidden flex flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
         <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
 
         <Envelope
