@@ -86,6 +86,7 @@ export default function useFabricCanvas({
         canvas.on("selection:updated", () => {
             const obj = canvas.getActiveObject()
             setActiveCanvas(canvasName)
+            if(obj.type === 'image') setIsTextObj(false)
             setShowLayerOptions(false)
             setFontDropdownOpen(false)
             setFontSizeDropdownOpen(false)

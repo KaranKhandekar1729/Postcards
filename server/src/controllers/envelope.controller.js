@@ -19,8 +19,7 @@ export const createEnvelope = asyncHandler(async (req, res) => {
 // GET /api/envelope
 export const getAllEnvelopes = asyncHandler(async (req, res) => {
     const filter = {
-        author: req.user._id,
-        status: { $in: ['draft', 'sent', 'scheduled'] }
+        author: req.user._id
     };
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -80,7 +79,7 @@ export const updateEnvelope = asyncHandler(async (req, res) => {
         throw new AppError('You are not allowed to update this envelope', 403)
     }
 
-    const allowedFields = ['title', 'from', 'to', 'status', 'envelope', 'letter', 'scheduledFor'];
+    const allowedFields = ['title', 'from', 'to', 'envelope', 'letter'];
     const updates = {};
 
     allowedFields.forEach((field) => {

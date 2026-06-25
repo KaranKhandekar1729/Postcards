@@ -341,7 +341,7 @@ export default function CardCanvas({
                                 ${letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : ''} 
                             `}
                         style={{
-                            "--letter-color": envelopeData?.letter?.color
+                            "--letter-color": envelopeData?.letter?.color ? envelopeData?.letter?.color : '#fffaf0'
                         }}
                     >
                     </div>
