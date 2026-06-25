@@ -28,12 +28,14 @@ export default function EditingView({ fontOptions, preloadFonts }) {
     const { state } = useLocation();
     const { isAuthenticated, loading } = useAuth()
 
+    const API_URL = import.meta.env.VITE_API_URL
+
     const uploadToCloudinary = async (file) => {
         if (!file) return;
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("http://localhost:3000/api/upload", {
+        const res = await fetch(`${API_URL}/api/upload`, {
             method: "POST",
             body: formData,
         });
@@ -43,14 +45,11 @@ export default function EditingView({ fontOptions, preloadFonts }) {
     };
 
     const addText = (canvas) => {
-        console.log("Clicked addText")
-        console.log(canvas)
         const text = new Textbox("Hello", {
             fontFamily: "Arial",
             fill: "#000",
             editable: true,
         });
-
         canvas?.add(text);
         canvas?.centerObject(text);
         canvas?.renderAll()
@@ -80,7 +79,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
 
         const getEnvelope = async () => {
             const res = await fetch(
-                `http://localhost:3000/api/envelope/${slug}`, {
+                `${API_URL}/api/envelope/${slug}`, {
                 credentials: 'include'
             }
             );
@@ -160,7 +159,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
             }
     
             if (!envelopeId) {
-                const res = await fetch('http://localhost:3000/api/envelope', {
+                const res = await fetch(`${API_URL}/api/envelope`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -172,7 +171,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 setEnvelopeId(data.data._id)
                 navigate(`/envelope/edit/${data.data.slug}`, { replace: true });
             } else {
-                await fetch(`http://localhost:3000/api/envelope/${envelopeId}`, {
+                await fetch(`${API_URL}/api/envelope/${envelopeId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
@@ -201,7 +200,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
 
 
     return (
-        <div className="flex flex-col-reverse lg:flex-row w-screen h-screen overflow-hidden">
+        <div className="transition-opacity duration-1000 animate-fade-in flex flex-col-reverse lg:flex-row w-screen h-screen overflow-hidden">
             <Sidebar
                 onAddText={addText}
                 onAddImage={addImage}
