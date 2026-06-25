@@ -127,7 +127,6 @@ export default function Envelope({
         setTimeout(loadCanvas, 0);
     }, [envelopeData]);
 
-
     return (
         <>
             {/* Envelope */}
@@ -150,8 +149,8 @@ export default function Envelope({
                 <div onClick={() => handleEnvelopeOpen()} className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
 
                     <div className={`absolute left-2/4 right-2/4 top-2/4 -translate-x-2/4 z-[31] animate-bounce -rotate-10 transition-opacity duration-300
-                    ${!isOpen && letterState === 'idle' ? 'opacity-100' : 'opacity-0'}
-                `}>
+                        ${!isOpen && letterState === 'idle' ? 'opacity-100' : 'opacity-0'}
+                    `}>
                         <span className="text-5xl md:text-8xl">👆</span>
                     </div>
 
@@ -233,7 +232,6 @@ export default function Envelope({
                     <div className="h-full w-full absolute bottom-0 z-20">
                         <div className="[clip-path:polygon(50%_50%,100%_0,100%_100%,0_100%,0_0)] bg-white w-full h-full before:content-[''] before:absolute before:bg-[#f8f6f7] before:w-2/4 before:h-full before:[clip-path:polygon(100%_50%,0_0,0_100%)] after:content-[''] after:bg-[#f8f6f7] after:absolute after:w-2/4 after:h-full after:right-0 after:[clip-path:polygon(0%_50%,100%_0,100%_100%)]"></div>
                     </div>
-
                 </div>
             </div>
         </>

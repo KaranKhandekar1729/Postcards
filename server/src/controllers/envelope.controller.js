@@ -31,7 +31,7 @@ export const getAllEnvelopes = asyncHandler(async (req, res) => {
 
     const [envelope, total] = await Promise.all([
         Envelope.find(filter)
-            .populate('author', 'username email')
+            .populate('author', 'username')
             .select('-letter')
             .sort(sort)
             .skip(skip)
@@ -59,7 +59,7 @@ export const getAllEnvelopes = asyncHandler(async (req, res) => {
 export const getEnvelope = asyncHandler(async (req, res) => {
     const envelope = await Envelope.findOne({
         slug: req.params.slug,
-    }).populate('author', 'username email');
+    }).populate('author', 'username');
 
     if (!envelope) throw new AppError('Envelope not found', 404);
 

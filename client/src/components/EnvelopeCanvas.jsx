@@ -1,30 +1,33 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import AuthModal from "./AuthModal";
 import Toolbar from "./Toolbar";
 import useFabricCanvas from "../hooks/useFabricCanvas";
 import '../styles/envelope.css';
 
-export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRef, letterFabricRef, envelopeData, envelopeId, setEnvelopeId, activeCanvas, setActiveCanvas }) {
-    const { state } = useLocation();
-    const navigate = useNavigate();
-    const { isAuthenticated, loading } = useAuth()
-    const [authOpen, setAuthOpen] = useState(false)
+export default function CardCanvas({ 
+    fontOptions, 
+    preloadFonts, 
+    envelopeFabricRef, 
+    letterFabricRef, 
+    envelopeData, 
+    activeCanvas, 
+    setActiveCanvas,
+    isFlipped,
+    isOpen,
+    letterState,
+    toolbarPos,
+    setToolbarPos,
+    handleEnvelopeOpen
+ }) {
     const envelopeCanvasRef = useRef(null)
     const envelopeRef = useRef(null)
     const letterCanvasRef = useRef(null)
     const letterRef = useRef(null)
-    const [toolbarPos, setToolbarPos] = useState({ x: 0, y: 0, visible: false });
     const [showLayerOptions, setShowLayerOptions] = useState(false)
     const [isTextObj, setIsTextObj] = useState(false)
     const [selectedFont, setSelectedFont] = useState('Arial')
     const [fontDropdownOpen, setFontDropdownOpen] = useState(false)
     const [fontSize, setFontSize] = useState(40)
     const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false)
-    const [isFlipped, setIsFlipped] = useState(false)
-    const [isOpen, setIsOpen] = useState(false)
-    const [letterState, setLetterState] = useState('idle')
     const letterFoldRef = useRef(null)
     const [letterCanvasHeight, setLetterCanvasHeight] = useState()
     const [letterCanvasTop, setLetterCanvasTop] = useState()
@@ -33,7 +36,7 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
         if (!letterFoldRef.current) return
         const measure = () => {
             const middleDivHeight = letterFoldRef.current.offsetHeight
-            const foldDivTop = letterFoldRef.current.offsetTop 
+            const foldDivTop = letterFoldRef.current.offsetTop
             setLetterCanvasHeight(middleDivHeight * 2.5)
             setLetterCanvasTop(foldDivTop - middleDivHeight * 0.75)
         }
@@ -44,43 +47,10 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
         return () => observer.disconnect()
     })
 
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    const handleEnvelopeOpen = async () => { 
-        if (!isFlipped) return
-
-        if (!isOpen && (letterState === 'idle')) {
-            // OPEN flap
-            setIsOpen(true) 
-            await sleep(1200)
-    
-            setLetterState('removing')
-            await sleep(600)
-            setIsOpen(false)
-            await sleep(2500)
-            setLetterState('opened')
-        } else {
-            // CLOSE flap
-            setToolbarPos(prev => ({...prev, visible: false}))
-            letterFabricRef.current?.discardActiveObject()
-            letterFabricRef.current?.renderAll()
-            setActiveCanvas(null)
-            setLetterState('closed')
-            await sleep(2000)
-            setIsOpen(true)
-            await sleep(1200)
-            setLetterState('returning')
-            await sleep(1200)
-            setIsOpen(false)
-            await sleep(200)        
-            setLetterState('idle')
-        }
-    }
-
     const resolveFontValue = (fontFamily) => {
         const match = fontOptions.find(
             f => f.label === fontFamily || f.value === fontFamily
-        ); 
+        );
         return match ? match.value : 'Arial'
     }
 
@@ -186,13 +156,11 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
         setShowLayerOptions(false)
     };
 
-    
-
     const updateFontFamily = async (fontValue, ref) => {
         const selected = fontOptions.find(f => f.value === fontValue)
 
         if (!selected) return
-        
+
         setSelectedFont(selected.value)
 
         if (selected.url) {
@@ -201,12 +169,12 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
             document.fonts.add(fontFace)
         } else if (selected.googleFont) {
             try {
-                await document.fonts.load(`16px "${selected.label}"`) 
+                await document.fonts.load(`16px "${selected.label}"`)
             } catch {
                 console.warn(`Could not load font: ${selected.label}`)
             }
         }
-        
+
         const canvas = ref?.current;
         const obj = canvas?.getActiveObject();
         if (!obj) return;
@@ -225,7 +193,7 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
             canvas.renderAll()
             return
         }
-        
+
         obj.set({ fontWeight: 'Bold' })
         canvas.renderAll();
     }
@@ -243,58 +211,6 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
         canvas.renderAll();
     }
 
-    const saveEnvelope = async (envelopeFabricRef, letterFabricRef) => {
-        const envelopeFabric = envelopeFabricRef?.current
-        const letterFabric = letterFabricRef?.current
-
-        const payload = {
-            title: state?.title,
-            from: state?.from,
-            to: state?.to,
-            envelope: { 
-                fabricData: envelopeFabric?.toJSON()
-            },
-            letter: {
-                color: '#fdf6d3',
-                fabricData: letterFabric?.toJSON()
-            }
-        }
-
-        if (!envelopeId) {
-            const res = await fetch('http://localhost:3000/api/envelope', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(payload)
-            })
-            const data = await res.json();
-            setEnvelopeId(data.data._id)
-            navigate(`/envelope/edit/${data.data.slug}`, { replace: true });
-        } else {
-            await fetch(`http://localhost:3000/api/envelope/${envelopeId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(payload)
-            })
-        }
-    }
-
-    const handleSave = async () => {
-        if (loading) return
-
-        if (!isAuthenticated) {
-            setAuthOpen(true)
-            return
-        }
-
-        await saveEnvelope(envelopeFabricRef, letterFabricRef)
-    }
-
     useEffect(() => {
         const envelopeCanvas = envelopeFabricRef.current;
         const letterCanvas = letterFabricRef.current;
@@ -304,21 +220,19 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
         if (!envelopeData?.letter?.fabricData) return;
 
         const loadCanvas = async () => {
-
-            
             try {
-                await preloadFonts()        
+                await preloadFonts()
                 console.log(envelopeData)
                 const envelopeFabricJson =
-                typeof envelopeData?.envelope?.fabricData === "string"
-                ? JSON.parse(envelopeData?.envelope?.fabricData)
-                : envelopeData?.envelope?.fabricData;
+                    typeof envelopeData?.envelope?.fabricData === "string"
+                        ? JSON.parse(envelopeData?.envelope?.fabricData)
+                        : envelopeData?.envelope?.fabricData;
                 console.log("envelope fabric", envelopeFabricJson)
 
                 const letterFabricJson =
                     typeof envelopeData?.letter?.fabricData === "string"
-                    ? JSON.parse(envelopeData?.letter?.fabricData)
-                    : envelopeData?.letter?.fabricData;
+                        ? JSON.parse(envelopeData?.letter?.fabricData)
+                        : envelopeData?.letter?.fabricData;
 
                 console.log("letter fabric json", letterFabricJson)
                 await envelopeCanvas.loadFromJSON(envelopeFabricJson);
@@ -333,71 +247,60 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
         setTimeout(loadCanvas, 0);
     }, [envelopeData]);
 
-
-    const handleEnvelopeFlip = () => {
-        setIsFlipped(prev => !prev); 
-        setIsOpen(false); 
-        setLetterState('idle')
-        envelopeFabricRef.current?.discardActiveObject()
-        envelopeFabricRef.current?.renderAll()
-        letterFabricRef.current?.discardActiveObject()
-        letterFabricRef.current?.renderAll()
-        setActiveCanvas(null)
-        setToolbarPos(prev => ({ ...prev, visible: false }));
-
-    }
-
     return (
         <>
-            <div className="perspective-distant h-screen flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
-                <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
-
-                {/* Envelope */}
-                <div
-                    ref={envelopeRef}
-                    className={`group relative
-                    top-20 bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px] 
+            {/* Envelope */}
+            <div
+                ref={envelopeRef}
+                className={`group relative
+                    bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px] 
                     shadow-2xl drop-shadow-black transition-transform 
                     transform-3d duration-1000
                     ${isFlipped ? 'rotate-y-180' : ''} origin-center`}>
 
-                    {/* Back */}
-                    <div
-                        className="absolute inset-0 backface-hidden shadow-inner flex items-center justify-center z-50"
-                    >
-                        <canvas ref={envelopeCanvasRef} />
-                        {(toolbarPos.visible && activeCanvas === 'envelope') && (
-                            <Toolbar
-                                fabricRef={envelopeFabricRef}
-                                toolbarPos={toolbarPos}
-                                isTextObj={isTextObj}
-                                updateFontFamily={updateFontFamily}
-                                updateFontSize={updateFontSize}
-                                updateFontWeight={updateFontWeight}
-                                fontOptions={fontOptions}
-                                selectedFont={selectedFont}
-                                fontSizeOptions={fontSizeOptions}
-                                fontDropdownOpen={fontDropdownOpen}
-                                setFontDropdownOpen={setFontDropdownOpen}
-                                fontSize={fontSize}
-                                fontSizeDropdownOpen={fontSizeDropdownOpen}
-                                setFontSizeDropdownOpen={setFontSizeDropdownOpen}
-                                duplicate={duplicate}
-                                deleteSelected={deleteSelected}
-                                showLayerOptions={showLayerOptions}
-                                setShowLayerOptions={setShowLayerOptions}
-                                setLayerPosition={setLayerPosition}
-                            />
-                        )}
+                {/* Back */}
+                <div
+                    className="absolute inset-0 backface-hidden shadow-inner flex items-center justify-center z-50"
+                >
+                    <canvas ref={envelopeCanvasRef} />
+                    {(toolbarPos.visible && activeCanvas === 'envelope') && (
+                        <Toolbar
+                            fabricRef={envelopeFabricRef}
+                            toolbarPos={toolbarPos}
+                            isTextObj={isTextObj}
+                            updateFontFamily={updateFontFamily}
+                            updateFontSize={updateFontSize}
+                            updateFontWeight={updateFontWeight}
+                            fontOptions={fontOptions}
+                            selectedFont={selectedFont}
+                            fontSizeOptions={fontSizeOptions}
+                            fontDropdownOpen={fontDropdownOpen}
+                            setFontDropdownOpen={setFontDropdownOpen}
+                            fontSize={fontSize}
+                            fontSizeDropdownOpen={fontSizeDropdownOpen}
+                            setFontSizeDropdownOpen={setFontSizeDropdownOpen}
+                            duplicate={duplicate}
+                            deleteSelected={deleteSelected}
+                            showLayerOptions={showLayerOptions}
+                            setShowLayerOptions={setShowLayerOptions}
+                            setLayerPosition={setLayerPosition}
+                        />
+                    )}
 
+                </div>
+
+                {/* Front */}
+                <div onClick={() => handleEnvelopeOpen()} className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
+
+                    <div className={`absolute left-2/4 right-2/4 top-2/4 -translate-x-2/4 z-[31] animate-bounce -rotate-10 transition-opacity duration-300
+                            ${!isOpen && letterState === 'idle' ? 'opacity-100' : 'opacity-0'}
+                        `}>
+                        <span className="text-5xl md:text-8xl">👆</span>
                     </div>
 
-                    {/* Front */}
-                    <div className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
-
-                        {/* Flap */}
-                        <div
-                            className={`drop-shadow-lg 
+                    {/* Flap */}
+                    <div
+                        className={`drop-shadow-lg 
                             absolute w-full h-2/3 
                             transition-all duration-1000 delay-200 
                             ease-in-out origin-top before:content-[''] 
@@ -405,12 +308,12 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
                             before:bg-white before:absolute before:[clip-path:polygon(50%_100%,0_0,100%_0)] 
                             ${isOpen ? 'rotate-x-180 z-10' : 'z-30'}
                             before:transition-all before:duration-200 before:ease-in-out`}>
-                        </div>
+                    </div>
 
-                        {/* Letter */}
-                        <div
-                            ref={letterFoldRef}
-                            className={`shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)] absolute bg-(--letter-color)
+                    {/* Letter */}
+                    <div
+                        ref={letterFoldRef}
+                        className={`shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)] absolute bg-(--letter-color)
                                 bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 bg-cover bg-no-repeat
                                 border border-y-0 border-black/10
@@ -435,91 +338,70 @@ export default function CardCanvas({ fontOptions, preloadFonts, envelopeFabricRe
                                 after:transform-3d
                                 transition-all
                                 duration-2000
-                                ${ letterState === 'removing' ? 'letter-remove': ''} 
-                                ${ letterState === 'returning' ? 'letter-return': ''}
-                                ${ letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 -top-1! before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' }
-                                ${ letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : '' } 
+                                ${letterState === 'removing' ? 'letter-remove' : ''} 
+                                ${letterState === 'returning' ? 'letter-return' : ''}
+                                ${letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : ''}
+                                ${letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : ''} 
                             `}
-                            style={{
-                                "--letter-color": envelopeData?.letter?.color
-                            }}
-                            >
-                        </div>
-                        <div 
-                            ref={letterRef}
-                            className="absolute w-11/12 md:w-[550px] left-2/4 md:right-2/4 -translate-x-2/4"
-                            style={{
-                                height: letterCanvasHeight ? `${letterCanvasHeight}px` : undefined,
-                                top: letterCanvasTop ? `${letterCanvasTop}px` : undefined,
-                                opacity: letterState === 'opened' ? 1 : 0,
-                                zIndex: '40',
-                                pointerEvents: letterState === 'opened' ? 'auto' : 'none',
-                                transition: `opacity ${letterState === 'closed' ? 800: 4600}ms ease-in-out`
-                            }}
-                        >
-                            <canvas ref={letterCanvasRef} />
-                            {(toolbarPos.visible && activeCanvas === 'letter') && (
-                                <Toolbar
-                                    fabricRef={letterFabricRef}
-                                    toolbarPos={toolbarPos}
-                                    isTextObj={isTextObj}
-                                    updateFontFamily={updateFontFamily}
-                                    updateFontSize={updateFontSize}
-                                    updateFontWeight={updateFontWeight}
-                                    fontOptions={fontOptions}
-                                    selectedFont={selectedFont}
-                                    fontSizeOptions={fontSizeOptions}
-                                    fontDropdownOpen={fontDropdownOpen}
-                                    setFontDropdownOpen={setFontDropdownOpen}
-                                    fontSize={fontSize}
-                                    fontSizeDropdownOpen={fontSizeDropdownOpen}
-                                    setFontSizeDropdownOpen={setFontSizeDropdownOpen}
-                                    duplicate={duplicate}
-                                    deleteSelected={deleteSelected}
-                                    showLayerOptions={showLayerOptions}
-                                    setShowLayerOptions={setShowLayerOptions}
-                                    setLayerPosition={setLayerPosition}
-                                />
-                            )}
-                        </div>
-
-                        {/* Inner gradient for depth */}
-                        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/10 opacity-40 pointer-events-none" />
-                        {/* Envelope Front */}
-                        <div className="h-full w-full absolute bottom-0 z-20">
-                            <div className="[clip-path:polygon(50%_50%,100%_0,100%_100%,0_100%,0_0)] bg-white w-full h-full before:content-[''] before:absolute before:bg-[#f8f6f7] before:w-2/4 before:h-full before:[clip-path:polygon(100%_50%,0_0,0_100%)] after:content-[''] after:bg-[#f8f6f7] after:absolute after:w-2/4 after:h-full after:right-0 after:[clip-path:polygon(0%_50%,100%_0,100%_100%)]"></div>
-                        </div>
-
+                        style={{
+                            "--letter-color": envelopeData?.letter?.color
+                        }}
+                    >
                     </div>
-                </div>
-                <div className="relative top-[85px] flex gap-3">
-                    <button
-                        onClick={handleEnvelopeFlip}
-                        className='bg-white p-4 w-[100px] lg:w-32 cursor-pointer'
+                    <div
+                        ref={letterRef}
+                        className="absolute w-11/12 md:w-[550px] left-2/4 md:right-2/4 -translate-x-2/4"
+                        style={{
+                            height: letterCanvasHeight ? `${letterCanvasHeight}px` : undefined,
+                            top: letterCanvasTop ? `${letterCanvasTop}px` : undefined,
+                            opacity: letterState === 'opened' ? 1 : 0,
+                            zIndex: '40',
+                            pointerEvents: letterState === 'opened' ? 'auto' : 'none',
+                            transition: `opacity ${letterState === 'closed' ? 800 : 4600}ms ease-in-out`
+                        }}
                     >
-                        Flip
-                    </button>
-                    { isFlipped &&
-                        <button onClick={() => handleEnvelopeOpen()} className='bg-white p-4 w-[100px]'>{letterState === "opened" ? 'Close' : 'Open'}</button>
-                    }
-                    <button
-                        onClick={() => handleSave()}
-                        disabled={loading}
-                        className="cursor-pointer"
-                    >
-                        Save
-                    </button>
+                        <canvas ref={letterCanvasRef} />
+                        {isFlipped &&
+                            <button onClick={() => handleEnvelopeOpen()} className={`absolute top-2 p-2 w-6 h-6 flex items-center justify-center sm:w-9 sm:h-9 right-2 bg-gray-300/70 border-2 border-black/20 rounded-full
+                                    ${letterState === 'opened' ? 'visible' : 'invisible'}    
+                                `}>
+                                <span className="text-black/30 font-bold">&#10005;</span>
+                            </button>
+                        }
+                        {(toolbarPos.visible && activeCanvas === 'letter') && (
+                            <Toolbar
+                                fabricRef={letterFabricRef}
+                                toolbarPos={toolbarPos}
+                                isTextObj={isTextObj}
+                                updateFontFamily={updateFontFamily}
+                                updateFontSize={updateFontSize}
+                                updateFontWeight={updateFontWeight}
+                                fontOptions={fontOptions}
+                                selectedFont={selectedFont}
+                                fontSizeOptions={fontSizeOptions}
+                                fontDropdownOpen={fontDropdownOpen}
+                                setFontDropdownOpen={setFontDropdownOpen}
+                                fontSize={fontSize}
+                                fontSizeDropdownOpen={fontSizeDropdownOpen}
+                                setFontSizeDropdownOpen={setFontSizeDropdownOpen}
+                                duplicate={duplicate}
+                                deleteSelected={deleteSelected}
+                                showLayerOptions={showLayerOptions}
+                                setShowLayerOptions={setShowLayerOptions}
+                                setLayerPosition={setLayerPosition}
+                            />
+                        )}
+                    </div>
+
+                    {/* Inner gradient for depth */}
+                    <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/10 opacity-40 pointer-events-none" />
+                    {/* Envelope Front */}
+                    <div className="h-full w-full absolute bottom-0 z-20">
+                        <div className="[clip-path:polygon(50%_50%,100%_0,100%_100%,0_100%,0_0)] bg-white w-full h-full before:content-[''] before:absolute before:bg-[#f8f6f7] before:w-2/4 before:h-full before:[clip-path:polygon(100%_50%,0_0,0_100%)] after:content-[''] after:bg-[#f8f6f7] after:absolute after:w-2/4 after:h-full after:right-0 after:[clip-path:polygon(0%_50%,100%_0,100%_100%)]"></div>
+                    </div>
+
                 </div>
             </div>
-
-            <AuthModal
-                open={authOpen}
-                onClose={() => setAuthOpen(false)}
-                onSuccess={async () => {
-                    setAuthOpen(false)
-                    await saveEnvelope()
-                }}
-            />
         </>
     )
 }

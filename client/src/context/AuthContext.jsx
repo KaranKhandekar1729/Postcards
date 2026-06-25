@@ -16,12 +16,12 @@ export function AuthProvider({ children }) {
             .finally(() => setLoading(false));
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (username, password) => {
         const res = await fetch('http://localhost:3000/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ username, password }),
         });
 
         const data = await res.json()
@@ -29,12 +29,12 @@ export function AuthProvider({ children }) {
         setUser(data.data);
     }
 
-    const register =  async (username, email, password) => {
+    const register =  async (username, password) => {
         const res = await fetch('http://localhost:3000/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ username, email, password })
+            body: JSON.stringify({ username, password })
         });
 
         const data = await res.json()
