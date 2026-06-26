@@ -91,6 +91,23 @@ export default function Envelope({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const scaleToCanvasContainer = (canvas, savedWidth, savedHeight) => {
+        if (!savedWidth || !savedHeight) return;
+
+        const scaleX = canvas.width / savedWidth;
+        const scaleY = canvas.height / savedHeight;
+
+        canvas.getObjects().forEach(obj => {
+            obj.set({
+                left: obj.left * scaleX,
+                top: obj.top * scaleY,
+                scaleX: obj.scaleX * scaleX,
+                scaleY: obj.scaleY * scaleY,
+            });
+            obj.setCoords();
+        });
+    };
+
     useEffect(() => {
         const envelopeCanvas = envelopeFabricRef?.current;
         const letterCanvas = letterFabricRef?.current;
@@ -102,22 +119,23 @@ export default function Envelope({
         const loadCanvas = async () => {
             try {
                 await preloadFonts()
-                console.log(envelopeData)
+
                 const envelopeFabricJson =
                     typeof envelopeData?.envelope?.fabricData === "string"
                         ? JSON.parse(envelopeData?.envelope?.fabricData)
                         : envelopeData?.envelope?.fabricData;
-                console.log("envelope fabric", envelopeFabricJson)
 
                 const letterFabricJson =
                     typeof envelopeData?.letter?.fabricData === "string"
                         ? JSON.parse(envelopeData?.letter?.fabricData)
                         : envelopeData?.letter?.fabricData;
 
-                console.log("letter fabric json", letterFabricJson)
                 await envelopeCanvas.loadFromJSON(envelopeFabricJson);
+                scaleToCanvasContainer(envelopeCanvas, envelopeData?.envelope?.canvasWidth, envelopeData?.envelope?.canvasHeight)
                 envelopeCanvas.renderAll();
+
                 await letterCanvas.loadFromJSON(letterFabricJson);
+                scaleToCanvasContainer(letterCanvas, envelopeData?.letter?.canvasWidth, envelopeData?.letter?.canvasHeight)
                 letterCanvas.renderAll();
             } catch (err) {
                 console.error("Error loading fabric JSON:", err);
@@ -170,14 +188,12 @@ export default function Envelope({
                     <div
                         ref={letterFoldRef}
                         className={`shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)] absolute bg-(--letter-color)
-                                bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 bg-cover bg-no-repeat
                                 border border-y-0 border-black/10
                                 w-11/12 h-[160px] xs:h-[210px] sm:h-[240px] md:w-[550px] md:h-[230px] lg:h-[250px] xl:h-[280px] top-8 md:top-15 z-10
                                 left-2/4 md:right-2/4 -translate-x-2/4  perspective-distant 
                                 before:content-[''] before:bg-(--letter-color)
                                 before:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)]
-                                before:bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 before:bg-cover before:bg-no-repeat
                                 before:border before:border-t-0 before:border-black/10
                                 before:absolute before:h-3/4 before:w-full 
@@ -185,7 +201,6 @@ export default function Envelope({
                                 before:transform-3d after:content-['']
                                 after:bg-(--letter-color)
                                 after:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.1),inset_-12px_0_20px_-12px_rgba(0,0,0,0.1)]
-                                after:bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1782036667/envelope-uploads/d9prpf2m5bfn3saotmqi.jpg')]
                                 after:bg-cover after:bg-no-repeat
                                 after:border after:border-b-0 after:border-black/10
                                 after:bottom-0 
@@ -200,7 +215,7 @@ export default function Envelope({
                                 ${letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : ''} 
                             `}
                         style={{
-                            "--letter-color": envelopeData?.letter?.color
+                            "--letter-color": envelopeData?.letter?.color ? envelopeData?.letter?.color : '#fffaf0'
                         }}
                     >
                     </div>

@@ -211,6 +211,23 @@ export default function CardCanvas({
         canvas.renderAll();
     }
 
+    const scaleToCanvasContainer = (canvas, savedWidth, savedHeight) => {
+        if (!savedWidth || !savedHeight) return;
+
+        const scaleX = canvas.width / savedWidth;
+        const scaleY = canvas.height / savedHeight;
+
+        canvas.getObjects().forEach(obj => {
+            obj.set({
+                left: obj.left * scaleX,
+                top: obj.top * scaleY,
+                scaleX: obj.scaleX * scaleX,
+                scaleY: obj.scaleY * scaleY,
+            });
+            obj.setCoords();
+        });
+    };
+
     useEffect(() => {
         const envelopeCanvas = envelopeFabricRef.current;
         const letterCanvas = letterFabricRef.current;
@@ -222,22 +239,22 @@ export default function CardCanvas({
         const loadCanvas = async () => {
             try {
                 await preloadFonts()
-                console.log(envelopeData)
                 const envelopeFabricJson =
                     typeof envelopeData?.envelope?.fabricData === "string"
                         ? JSON.parse(envelopeData?.envelope?.fabricData)
                         : envelopeData?.envelope?.fabricData;
-                console.log("envelope fabric", envelopeFabricJson)
 
                 const letterFabricJson =
                     typeof envelopeData?.letter?.fabricData === "string"
                         ? JSON.parse(envelopeData?.letter?.fabricData)
                         : envelopeData?.letter?.fabricData;
 
-                console.log("letter fabric json", letterFabricJson)
                 await envelopeCanvas.loadFromJSON(envelopeFabricJson);
+                scaleToCanvasContainer(envelopeCanvas, envelopeData?.envelope?.canvasWidth, envelopeData?.envelope?.canvasHeight);
                 envelopeCanvas.renderAll();
+
                 await letterCanvas.loadFromJSON(letterFabricJson);
+                scaleToCanvasContainer(letterCanvas, envelopeData?.letter?.canvasWidth, envelopeData?.letter?.canvasHeight);
                 letterCanvas.renderAll();
             } catch (err) {
                 console.error("Error loading fabric JSON:", err);
