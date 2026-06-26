@@ -1,15 +1,18 @@
 import { Share2 } from "lucide-react"
 
-export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeFabricRef, letterFabricRef, activeCanvas, openShareModal }) {
+export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeFabricRef, letterFabricRef, activeCanvas, visibleCanvas, openShareModal }) {
 
-    const fabricRef = activeCanvas === 'envelope' ? envelopeFabricRef : letterFabricRef
+    const targetCanvas = activeCanvas ?? visibleCanvas;
+    const fabricRef = targetCanvas === 'letter' ? letterFabricRef : envelopeFabricRef
+    const disabled = !targetCanvas;
 
     return (
         <>
             <div className="w-full h-13 lg:w-15 lg:h-full bg-red-950 border-t-2 border-t-yellow-900 lg:border-r-2 lg:border-t-0 lg:border-r-yellow-900">
                 <div className="flex flex-row lg:flex-col gap-12 lg:gap-6 flex-1 justify-center items-center">
                     <button 
-                        onClick={() => onAddText(fabricRef?.current)}
+                        onClick={() => !disabled && onAddText(fabricRef?.current)}
+                        disabled={disabled}
                         className="rounded-md cursor-pointer text-[2rem] font-bold text-white"
                         title="Add text"
                     >
@@ -25,7 +28,8 @@ export default function Sidebar ({ onAddText, onAddImage, isUploading, envelopeF
                         <input 
                             type="file" 
                             accept="image/*" 
-                            onChange={(e) => onAddImage(e, fabricRef?.current)} 
+                            disabled={disabled}
+                            onChange={(e) => !disabled && onAddImage(e, fabricRef?.current)} 
                             onClick={e => e.target.value = null}
                             className="hidden"
                         />
