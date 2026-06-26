@@ -1,6 +1,6 @@
 {
-    "name": "foryouletter",
-    "short_name": "foryouletter",
+    "name": "Send a letter",
+    "short_name": "SendLetter",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
