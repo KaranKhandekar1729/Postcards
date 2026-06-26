@@ -28,18 +28,36 @@ export default function EditingView({ fontOptions, preloadFonts }) {
     const { state } = useLocation();
     const { isAuthenticated, loading } = useAuth()
 
+    const visibleCanvas = (!isFlipped) 
+        ? 'envelope'
+        : (letterState === 'opened' ? 'letter' : null);
+
     const uploadToCloudinary = async (file) => {
         if (!file) return;
+
+        const sigRes = await fetch('/api/upload/signature', { credentials: 'include' });
+        const { signature, timestamp, cloudName, apiKey, folder } = await sigRes.json()
+        
         const formData = new FormData();
         formData.append("file", file);
+        formData.append('api_key', apiKey);
+        formData.append('timestamp', timestamp);
+        formData.append('signature', signature);
+        formData.append('folder', folder);
 
-        const res = await fetch('/api/upload', {
-            method: "POST",
-            body: formData,
-        });
+        const uploadRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            { method: 'POST', body: formData }
+        )
 
-        const data = await res.json();
-        return data.url;
+        const data = await uploadRes.json();
+
+        // Url with transformations
+        const optimizedUrl = (url, width=700) => {
+            return url.replace('/upload/', `/upload/w_${width},c_limit,f_auto,q_auto/`)
+        }
+
+        return optimizedUrl(data.secure_url);
     };
 
     const addText = (canvas) => {
@@ -206,6 +224,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 envelopeFabricRef={envelopeFabricRef}
                 letterFabricRef={letterFabricRef}
                 activeCanvas={activeCanvas}
+                visibleCanvas={visibleCanvas}
                 openShareModal={() => setOpenShareModal(true)}
             />
 
