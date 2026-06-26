@@ -166,11 +166,15 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 from: state?.from,
                 to: state?.to,
                 envelope: {
-                    fabricData: envelopeFabric?.toJSON()
+                    fabricData: envelopeFabric?.toJSON(),
+                    canvasWidth: envelopeFabric?.width,
+                    canvasHeight: envelopeFabric?.height,
                 },
                 letter: {
                     color: '#fdf6d3',
-                    fabricData: letterFabric?.toJSON()
+                    fabricData: letterFabric?.toJSON(),
+                    canvasWidth: letterFabric?.width,
+                    canvasHeight: letterFabric?.height,
                 }
             }
     

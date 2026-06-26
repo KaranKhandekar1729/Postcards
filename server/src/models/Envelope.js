@@ -39,7 +39,9 @@ const envelopeSchema = new mongoose.Schema({
             type: String,
             default: '#ffffff'
         },
-        fabricData: Object
+        fabricData: Object,
+        canvasWidth: Number,
+        canvasHeight: Number
     },
 
     // Letter content/design
@@ -48,7 +50,9 @@ const envelopeSchema = new mongoose.Schema({
             type: String,
             default: '#fffaf0'
         },
-        fabricData: Object
+        fabricData: Object,
+        canvasWidth: Number,
+        canvasHeight: Number
     }
 }, {
     timestamps: true

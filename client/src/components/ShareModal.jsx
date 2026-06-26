@@ -5,20 +5,20 @@ import { Check, Copy } from "lucide-react"
 export default function ShareModal({ onClose }) {
   const [copy, setCopy] = useState(false)
   const openWhatsapp = () => {
-    window.open(`https://api.whatsapp.com/send?text=${window.location.href}`, '_blank')
+    window.open(`https://api.whatsapp.com/send?text=${window.location.origin}/envelope/${window.location.pathname.split('/').pop()}`, '_blank')
   }
   const openFacebook = () => {
-    window.open(`https://facebook.com/sharer/sharer.php?u=${window.location.href}`, '_blank')
+    window.open(`https://facebook.com/sharer/sharer.php?u=${window.location.origin}/envelope/${window.location.pathname.split('/').pop()}`, '_blank')
   }
   const openMail = () => {
-    window.open(`mailto:?subject=&body=Check%20out%20this%20link:${window.location.href}`, '_blank')
+    window.open(`mailto:?subject=&body=Check%20out%20this%20link:${window.location.origin}/envelope/${window.location.pathname.split('/').pop()}`, '_blank')
   }
   const openTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?url=${window.location.href}`, '_blank')
+    window.open(`https://twitter.com/intent/tweet?url=${window.location.origin}/envelope/${window.location.pathname.split('/').pop()}`, '_blank')
   }
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`${window.location.href}`)
+    navigator.clipboard.writeText(`${window.location.origin}/envelope/${window.location.pathname.split('/').pop()}`)
     setCopy(true)
     setTimeout(() => setCopy(false), 500)
   }
