@@ -10,15 +10,13 @@ export default function EnvelopeView({ preloadFonts }) {
     const [envelopeData, setEnvelopeData] = useState(null)
     const {slug} = useParams()
 
-    const API_URL = import.meta.env.VITE_API_URL
-
     // fetch envelope
     useEffect(() => {
         if (!slug) return;
 
         const getEnvelopeData = async () => {
             const res = await fetch(
-                `${API_URL}/api/envelope/${slug}`, {
+                '/api/envelope/${slug}', {
                     credentials: 'include'
                 }
             );
