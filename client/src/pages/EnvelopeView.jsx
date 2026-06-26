@@ -16,7 +16,7 @@ export default function EnvelopeView({ preloadFonts }) {
 
         const getEnvelopeData = async () => {
             const res = await fetch(
-                '/api/envelope/${slug}', {
+                `/api/envelope/${slug}`, {
                     credentials: 'include'
                 }
             );

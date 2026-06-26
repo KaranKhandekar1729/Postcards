@@ -77,7 +77,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
 
         const getEnvelope = async () => {
             const res = await fetch(
-                '/api/envelope/${slug}', {
+                `/api/envelope/${slug}`, {
                 credentials: 'include'
             }
             );
@@ -169,7 +169,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 setEnvelopeId(data.data._id)
                 navigate(`/envelope/edit/${data.data.slug}`, { replace: true });
             } else {
-                await fetch('/api/envelope/${envelopeId}', {
+                await fetch(`/api/envelope/${envelopeId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
