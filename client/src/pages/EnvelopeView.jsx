@@ -15,14 +15,9 @@ export default function EnvelopeView({ preloadFonts }) {
         if (!slug) return;
 
         const getEnvelopeData = async () => {
-            const res = await fetch(
-                `/api/envelope/${slug}`, {
-                    credentials: 'include'
-                }
-            );
+            const res = await fetch(`/api/envelope/${slug}`);
             const data = await res.json();
             setEnvelopeData(data.data);
-            console.log(data.data)
         };
 
         getEnvelopeData();

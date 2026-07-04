@@ -11,7 +11,7 @@ import { authenticate } from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 router.get('/', authenticate, getAllEnvelopes);
-router.get('/:slug', authenticate, getEnvelope);
+router.get('/:slug', getEnvelope);
 
 router.post('/', authenticate, createEnvelope);
 router.patch('/:id', authenticate, updateEnvelope);
