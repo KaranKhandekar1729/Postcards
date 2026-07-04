@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /$
+Allow: /sitemap.xml
+Allow: /robots.txt
 Disallow: /
 
 Sitemap: https://sendaletter.vercel.app/sitemap.xml
