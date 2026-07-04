@@ -22,6 +22,8 @@ export default function EditingView({ fontOptions, preloadFonts }) {
     const [authOpen, setAuthOpen] = useState(false)
     const [saveStatus, setSaveStatus] = useState('idle')
     const [openShareModal, setOpenShareModal] = useState(false)
+    const [envelopeColor, setEnvelopeColor] = useState('#ffffff')
+    const [letterColor, setLetterColor] = useState('#fffaf0')
 
     const navigate = useNavigate();
     const { slug } = useParams();
@@ -63,6 +65,7 @@ export default function EditingView({ fontOptions, preloadFonts }) {
     const addText = (canvas) => {
         const text = new Textbox("Hello", {
             fontFamily: "Arial",
+            fontSize: 24,
             fill: "#000",
             editable: true,
         });
@@ -102,6 +105,8 @@ export default function EditingView({ fontOptions, preloadFonts }) {
             const data = await res.json();
             setEnvelope(data.data);
             setEnvelopeId(data.data._id)
+            setEnvelopeColor(data.data?.envelope?.color ?? '#ffffff')
+            setLetterColor(data.data?.letter?.color ?? '#fffaf0')
             console.log(data.data)
         };
 
@@ -166,12 +171,13 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 from: state?.from,
                 to: state?.to,
                 envelope: {
+                    color: envelopeColor,
                     fabricData: envelopeFabric?.toJSON(),
                     canvasWidth: envelopeFabric?.width,
                     canvasHeight: envelopeFabric?.height,
                 },
                 letter: {
-                    color: '#fdf6d3',
+                    color: letterColor,
                     fabricData: letterFabric?.toJSON(),
                     canvasWidth: letterFabric?.width,
                     canvasHeight: letterFabric?.height,
@@ -230,9 +236,13 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                 activeCanvas={activeCanvas}
                 visibleCanvas={visibleCanvas}
                 openShareModal={() => setOpenShareModal(true)}
+                envelopeColor={envelopeColor}
+                setEnvelopeColor={setEnvelopeColor}
+                letterColor={letterColor}
+                setLetterColor={setLetterColor}
             />
 
-            <div className="perspective-distant h-screen flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
+            <div className="perspective-distant min-h-0 flex flex-1 flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
                 <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
                 <EnvelopeCanvas
                     fontOptions={fontOptions}
@@ -248,6 +258,8 @@ export default function EditingView({ fontOptions, preloadFonts }) {
                     toolbarPos={toolbarPos}
                     setToolbarPos={setToolbarPos}
                     handleEnvelopeOpen={handleEnvelopeOpen}
+                    envelopeColor={envelopeColor}
+                    letterColor={letterColor}
                 />
                 { (!isOpen && letterState === 'idle') && (
                         <div className="absolute top-2 right-2 flex gap-3">

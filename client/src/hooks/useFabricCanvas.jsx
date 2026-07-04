@@ -14,7 +14,10 @@ export default function useFabricCanvas({
     setFontDropdownOpen,
     setFontSizeDropdownOpen,
     setFontSize,
-    setSelectedFont
+    setSelectedFont,
+    setTextColor,
+    setTextAlign,
+    setIsBold
 }) {
     useEffect(() => {
         if (fabricRef?.current) return
@@ -50,25 +53,18 @@ export default function useFabricCanvas({
             
             const rect = obj.getBoundingRect();
 
+            setIsTextObj(obj.type === 'textbox')
             if (obj.type === 'textbox') {
-                setIsTextObj(true)
-
                 obj.controls.mt.visible = false
                 obj.controls.mb.visible = false
-
-                setToolbarPos({
-                    visible: true,
-                    x: rect.left + canvas.width/8,
-                    y: rect.top - 80,
-                });
-            } else {
-                setToolbarPos({
-                    visible: true,
-                    x: rect.left + canvas.width/4,
-                    y: rect.top - 80,
-                });
             }
 
+            // Toolbar sits centered above the object's top edge and follows it as it moves.
+            const x = rect.left + rect.width / 2;
+            const y = rect.top;
+            setToolbarPos(prev =>
+                (prev.visible && prev.x === x && prev.y === y) ? prev : { visible: true, x, y }
+            );
         };
         
         canvas.on("selection:created", () => {
@@ -79,8 +75,11 @@ export default function useFabricCanvas({
             updateToolbar()
             if (!obj || obj.type !== 'textbox' ) return
             console.log(obj.fontFamily)
-            setFontSize(obj.fontSize ?? 40)
+            setFontSize(obj.fontSize ?? 24)
             setSelectedFont(obj.fontFamily ?? 'Arial')
+            setTextColor(obj.fill ?? '#000000')
+            setTextAlign(obj.textAlign ?? 'left')
+            setIsBold((obj.fontWeight ?? '').toString().toLowerCase() === 'bold')
         });
 
         canvas.on("selection:updated", () => {
@@ -93,8 +92,11 @@ export default function useFabricCanvas({
             updateToolbar()
             if (!obj || obj.type !== 'textbox' ) return
             console.log(obj.fontFamily)
-            setFontSize(obj.fontSize ?? 40)
+            setFontSize(obj.fontSize ?? 24)
             setSelectedFont(obj.fontFamily ?? 'Arial')
+            setTextColor(obj.fill ?? '#000000')
+            setTextAlign(obj.textAlign ?? 'left')
+            setIsBold((obj.fontWeight ?? '').toString().toLowerCase() === 'bold')
         });
 
         canvas.on("selection:cleared", () => {
@@ -104,9 +106,12 @@ export default function useFabricCanvas({
             setShowLayerOptions(false)
             setFontDropdownOpen(false)
             setFontSizeDropdownOpen(false)
-            setFontSize(40)
+            setFontSize(24)
             setSelectedFont('Arial')
-        }); 
+            setTextColor('#000000')
+            setTextAlign('left')
+            setIsBold(false)
+        });
 
         canvas.on("object:moving", updateToolbar);
         canvas.on("object:scaling", updateToolbar);

@@ -150,21 +150,22 @@ export default function Envelope({
             {/* Envelope */}
             <div
                 ref={envelopeRef}
+                style={{ "--envelope-color": envelopeData?.envelope?.color || '#ffffff', "--letter-color": envelopeData?.letter?.color || '#fffaf0' }}
                 className={`group relative
-                    bg-white w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px]
-                    shadow-2xl drop-shadow-black transition-transform 
+                    bg-(--envelope-color) w-[95%] h-[200px] xs:w-[90%] xs:h-[40%] sm:h-[50%] md:w-[700px] md:h-[360px]
+                    shadow-[0_30px_55px_-15px_rgba(0,0,0,0.55)] transition-transform
                     transform-3d duration-1000
                     ${isFlipped ? 'rotate-y-180' : ''} origin-center`}>
 
                 {/* Back */}
                 <div
-                    className="absolute inset-0 shadow-[inset_0_0_20px_10px_rgba(0,0,0,0.2)] backface-hidden flex items-center justify-center z-50"
+                    className="absolute inset-0 shadow-[inset_0_0_18px_12px_rgba(0,0,0,0.22)] backface-hidden flex items-center justify-center z-50"
                 >
                     <canvas ref={envelopeCanvasRef} />
                 </div>
 
                 {/* Front */}
-                <div onClick={() => handleEnvelopeOpen()} className="absolute inset-0 backface-hidden bg-white shadow-md rotate-y-180">
+                <div onClick={() => handleEnvelopeOpen()} className="absolute inset-0 backface-hidden bg-(--envelope-color) shadow-md rotate-y-180">
 
                     <div className={`absolute left-2/4 right-2/4 top-2/4 -translate-x-2/4 z-[31] animate-bounce -rotate-10 transition-opacity duration-300
                         ${!isOpen && letterState === 'idle' ? 'opacity-100' : 'opacity-0'}
@@ -179,7 +180,7 @@ export default function Envelope({
                             transition-all duration-1000 delay-200 
                             ease-in-out origin-top before:content-[''] 
                             before:origin-top before:w-full before:h-full 
-                            before:bg-white before:absolute before:[clip-path:polygon(50%_100%,0_0,100%_0)] 
+                            before:bg-(--envelope-color) before:absolute before:[clip-path:polygon(50%_100%,0_0,100%_0)]
                             ${isOpen ? 'rotate-x-180 z-10' : 'z-30'}
                             before:transition-all before:duration-200 before:ease-in-out`}>
                     </div>
@@ -214,9 +215,6 @@ export default function Envelope({
                                 ${letterState === 'opened' ? 'before:rotate-x-180 after:-rotate-x-180 z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : ''}
                                 ${letterState === 'closed' ? 'before:rotate-x-5 after:rotate-x-[-5deg] z-40 before:transition-all before:duration-2000 before:ease-in-out after:transition-all after:duration-2000 after:ease-in-out' : ''} 
                             `}
-                        style={{
-                            "--letter-color": envelopeData?.letter?.color ? envelopeData?.letter?.color : '#fffaf0'
-                        }}
                     >
                     </div>
                     <div
@@ -245,8 +243,7 @@ export default function Envelope({
                     <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/10 opacity-40 pointer-events-none" />
                     {/* Envelope Front */}
                     <div className="h-full w-full absolute bottom-0 z-20">
-                        <div className="before:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.5)] shadow-[inset_0_0_20px_3px_rgba(0,0,0,0.5)] [clip-path:polygon(50%_50%,100%_0,100%_100%,0_100%,0_0)] bg-white w-full h-full before:content-[''] before:absolute before:bg-[#f8f6f7] before:w-2/4 before:h-full before:[clip-path:polygon(100%_50%,0_0,0_100%)] after:content-[''] after:bg-[#f8f6f7] after:absolute after:w-2/4 after:h-full after:right-0 after:[clip-path:polygon(0%_50%,100%_0,100%_100%)]
-                            after:shadow-[inset_-12px_0_20px_-12px_rgba(0,0,0,0.5)]"></div>
+                        <div className="relative w-full h-full bg-(--envelope-color) [clip-path:polygon(50%_50%,100%_0,100%_100%,0_100%,0_0)] shadow-[inset_0_0_22px_3px_rgba(0,0,0,0.5)] drop-shadow-[0_-2px_3px_rgba(0,0,0,0.18)] before:content-[''] before:absolute before:w-2/4 before:h-full before:bg-[color-mix(in_srgb,var(--envelope-color),#000_7%)] before:[clip-path:polygon(100%_50%,0_0,0_100%)] before:shadow-[inset_12px_0_20px_-12px_rgba(0,0,0,0.5)] after:content-[''] after:absolute after:right-0 after:w-2/4 after:h-full after:bg-[color-mix(in_srgb,var(--envelope-color),#000_7%)] after:[clip-path:polygon(0%_50%,100%_0,100%_100%)] after:shadow-[inset_-12px_0_20px_-12px_rgba(0,0,0,0.5)]"></div>
                     </div>
                 </div>
             </div>
