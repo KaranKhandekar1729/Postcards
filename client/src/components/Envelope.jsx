@@ -159,7 +159,7 @@ export default function Envelope({
 
                 {/* Back */}
                 <div
-                    className="absolute inset-0 shadow-[inset_0_0_18px_12px_rgba(0,0,0,0.22)] backface-hidden flex items-center justify-center z-50"
+                    className="absolute inset-0 shadow-[inset_0_0_18px_8px_rgba(0,0,0,0.22)] backface-hidden flex items-center justify-center z-50"
                 >
                     <canvas ref={envelopeCanvasRef} />
                 </div>
@@ -231,7 +231,7 @@ export default function Envelope({
                     >
                         <canvas ref={letterCanvasRef} />
                         {isFlipped &&
-                            <button onClick={() => handleEnvelopeOpen()} className={`absolute top-2 p-2 w-6 h-6 flex items-center justify-center sm:w-9 sm:h-9 right-2 bg-gray-300/70 border-2 border-black/20 rounded-full
+                            <button onClick={() => handleEnvelopeOpen()} className={`absolute top-2 p-2 w-6 h-6 flex items-center justify-center sm:w-9 sm:h-9 right-2 bg-transparent border-2 border-black/20 rounded-full
                                     ${letterState === 'opened' ? 'visible' : 'invisible'}    
                                 `}>
                                 <span className="text-black/30 font-bold">&#10005;</span>

@@ -3,6 +3,8 @@ import Envelope from '../components/Envelope'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 
+const DEFAULT_BACKGROUND = "url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')"
+
 export default function EnvelopeView({ preloadFonts }) {
     const [isFlipped, setIsFlipped] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
@@ -60,8 +62,11 @@ export default function EnvelopeView({ preloadFonts }) {
     }
 
   return (
-    <div className="transition-opacity duration-1000 animate-fade-in perspective-distant h-screen overflow-hidden flex flex-col gap-3 justify-center items-center bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')] bg-no-repeat bg-cover">
-        <div className="absolute inset-0 backdrop-blur-xs bg-black/30" />
+    <div
+        className="transition-opacity duration-1000 animate-fade-in perspective-distant relative h-dvh max-h-dvh overflow-hidden flex flex-col gap-3 justify-center items-center bg-no-repeat bg-cover bg-center"
+        style={{ backgroundImage: envelopeData?.background ?? DEFAULT_BACKGROUND }}
+    >
+        <div className="absolute inset-0 backdrop-blur-xs bg-black/10" />
 
         <Envelope
             preloadFonts={preloadFonts}

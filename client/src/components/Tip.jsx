@@ -8,7 +8,7 @@ export default function Tip({ label, side = "top", children }) {
             <Tooltip.Portal>
                 <Tooltip.Content
                     side={side}
-                    sideOffset={16}
+                    sideOffset={20}
                     className="z-[80] select-none font-system rounded-md bg-red-950 border border-red-200/20 px-3 py-2 text-sm text-amber-50 shadow-md"
                 >
                     {label}

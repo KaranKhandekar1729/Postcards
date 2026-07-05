@@ -79,7 +79,7 @@ export const updateEnvelope = asyncHandler(async (req, res) => {
         throw new AppError('You are not allowed to update this envelope', 403)
     }
 
-    const allowedFields = ['title', 'from', 'to', 'envelope', 'letter'];
+    const allowedFields = ['title', 'from', 'to', 'background', 'envelope', 'letter'];
     const updates = {};
 
     allowedFields.forEach((field) => {
@@ -90,13 +90,13 @@ export const updateEnvelope = asyncHandler(async (req, res) => {
 
     console.log('updates:', updates);
     
-    await Envelope.findByIdAndUpdate(
+    const updatedEnvelope = await Envelope.findByIdAndUpdate(
         req.params.id,
         { $set: updates },
         { returnDocument: 'after', runValidators: true }
     );
 
-    res.status(200).json({ success: true, data: envelope });
+    res.status(200).json({ success: true, data: updatedEnvelope });
 });
 
 // DELETE /api/envelope/:id

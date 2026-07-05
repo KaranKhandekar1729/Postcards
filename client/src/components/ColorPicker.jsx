@@ -9,7 +9,7 @@ const supportsEyeDropper = typeof window !== 'undefined' && 'EyeDropper' in wind
 // Reusable color picker. `children` is the trigger (e.g. a swatch button).
 // Radix Popover handles positioning, collision and outside-click for us.
 // Pass `tooltip` (requires a Tooltip.Provider ancestor) to label the trigger.
-export default function ColorPicker({ color, onChange, children, side = "bottom", align = "start", tooltip, tooltipSide = "top" }) {
+export default function ColorPicker({ color, onChange, children, side = "bottom", align = "start", tooltip, tooltipSide = "top", sideOffset = 6 }) {
     const pickFromScreen = async () => {
         if (!supportsEyeDropper) return
         try {
@@ -33,7 +33,7 @@ export default function ColorPicker({ color, onChange, children, side = "bottom"
                 <Popover.Content
                     side={side}
                     align={align}
-                    sideOffset={6}
+                    sideOffset={sideOffset}
                     collisionPadding={8}
                     className="color-popover z-[70] w-[208px] bg-white rounded-xl shadow-lg p-2 flex flex-col gap-2"
                 >

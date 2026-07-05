@@ -33,6 +33,11 @@ const envelopeSchema = new mongoose.Schema({
         required: true
     },
 
+    background: {
+        type: String,
+        default: "url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')"
+    },
+
     // Envelope design
     envelope: {
         color: {

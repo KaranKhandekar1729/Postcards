@@ -4,6 +4,24 @@
     box-sizing: border-box;
 }
 
+.postcards-thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(251 191 36 / 0.45) transparent;
+}
+
+.postcards-thin-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.postcards-thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.postcards-thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(251 191 36 / 0.45);
+    border-radius: 9999px;
+}
+
 /* ─── Fonts ───────────────────────────────────────────── */
 @font-face {
   font-family: 'Tiempos Text';
