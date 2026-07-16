@@ -9,7 +9,7 @@ const features = [
         title: "Edit on your phone",
         body: "Don't let anything stop you! Create and edit from anywhere",
         span: "sm:col-span-1",
-        image: "https://res.cloudinary.com/docidcbkt/image/upload/v1784197404/envelope-uploads/064d2117d74ef86c2387cc47301db33c.png",
+        image: "https://res.cloudinary.com/docidcbkt/image/upload/v1784197404/envelope-uploads/6f3d5d3bc84f9aec9eb085777df2f55d.png",
     },
     {
         title: "Share it anywhere",
@@ -34,7 +34,7 @@ export default function Grid() {
                         key={f.title}
                         className={`${f.span} bg-[#ffffff] rounded-xl p-4 flex flex-col`}
                     >
-                        <div className="w-full rounded-lg overflow-hidden bg-[#F5EEE0] mb-4">
+                        <div className="w-full rounded-sm sm:rounded-lg overflow-hidden bg-[#F5EEE0] mb-4">
                             <img
                                 src={f.image}
                                 alt={f.title}
