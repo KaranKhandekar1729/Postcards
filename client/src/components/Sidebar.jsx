@@ -32,7 +32,7 @@ const backgroundOptions = [
     { id: "background-3", url: "https://res.cloudinary.com/docidcbkt/image/upload/w_1440,f_auto,q_auto/v1783257646/envelope-uploads/590102d54e2d6583f42a3f9d89a0cf00.jpg", label: "autumn" },
     { id: "background-4", url: "https://res.cloudinary.com/docidcbkt/image/upload/w_1440,f_auto,q_auto/v1783263476/envelope-uploads/7c71f457e103088d0e359ada7d17aa00.jpg", label: "cozy room" },
     { id: 'background-5', url: "https://res.cloudinary.com/docidcbkt/image/upload/w_1440,f_auto,q_auto/v1783264055/envelope-uploads/3b4da4ea231780aa821a2b29c783989e.jpg", label: "into the woods" },
-    { id: 'background-5', url: "https://res.cloudinary.com/docidcbkt/image/upload/w_1440,f_auto,q_auto/v1783264687/envelope-uploads/ac5ae1f8f62fbbf22adc17f0a37534e4.jpg", label: "cozy room 2" }
+    { id: 'background-6', url: "https://res.cloudinary.com/docidcbkt/image/upload/w_1440,f_auto,q_auto/v1783264687/envelope-uploads/ac5ae1f8f62fbbf22adc17f0a37534e4.jpg", label: "cozy room 2" }
 ]
 
 const useSidebarPopupSide = () => {

@@ -46,8 +46,16 @@
 
 @font-face {
   font-family: 'Tiempos Headline';
-  src: url('/fonts/TiemposHeadline-Regular.woff') format('woff');
+  src: url('/fonts/TiemposHeadline-Regular.woff2') format('woff2');
   font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tiempos Headline';
+  src: url('/fonts/TiemposHeadline-RegularItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -55,6 +63,14 @@
   font-family: 'Tiempos Headline';
   src: url('/fonts/TiemposHeadline-Medium.woff2') format('woff2');
   font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tiempos Headline';
+  src: url('/fonts/TiemposHeadline-MediumItalic.woff2') format('woff2');
+  font-weight: 600;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -118,6 +134,7 @@
   --color-content-inverse:  #fafaf9;
   --color-accent:           #000080;
   --color-accent-hover:     #ea6c0a;
+  --color-text-white:       #fffdf6; 
 
   /* Spacing — 4px base */
   --spacing-1:  0.25rem;
