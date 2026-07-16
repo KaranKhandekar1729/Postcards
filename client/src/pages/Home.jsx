@@ -7,7 +7,7 @@ export default function Home() {
 
     return (
         <div className="bg-[#f1f1f1]">
-            <div className="transition-opacity duration-1000 relative min-h-screen py-24 sm:py-0 animate-fade-in flex flex-col justify-center items-center">
+            <div className="transition-opacity duration-1000 relative min-h-svh py-24 sm:py-0 animate-fade-in flex flex-col justify-center items-center">
                 <div className="absolute inset-0 m-0 sm:m-4 sm:rounded-xl bg-[url('https://res.cloudinary.com/docidcbkt/image/upload/v1783264055/envelope-uploads/3b4da4ea231780aa821a2b29c783989e.jpg')] bg-no-repeat bg-cover bg-bottom" />
                 <div className="relative w-full max-w-4xl mx-auto px-6 flex flex-col items-center justify-center">
                     <div className="relative z-10 w-full flex flex-col gap-4 sm:gap-6 justify-center items-center">
