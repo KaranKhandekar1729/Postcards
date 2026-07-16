@@ -26,7 +26,7 @@ export default function CreateEnvelopeForm({ open, onClose }) {
                             <div className="flex flex-col gap-2 w-full">
                                 <label className="text-white font-advercase text-lg">Give a name to your envelope</label>
                                 <input
-                                    className="border border-white/50 focus:outline-2 focus:white p-3 rounded-md font-advercase placeholder:text-white/50 text-white"
+                                    className="border border-white/50 focus:outline-2 focus:outline-white p-3 rounded-md font-advercase placeholder:text-white/50 text-white"
                                     type="text" name="title"
                                     autoFocus
                                     required
