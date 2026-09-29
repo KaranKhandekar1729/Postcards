@@ -7,6 +7,7 @@ import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import EnvelopeView from './pages/EnvelopeView';
+import MyEnvelopes from './pages/MyEnvelopes';
 
 function App() {
   const fontOptions = [
@@ -38,6 +39,11 @@ function App() {
           <Route path="/" element={ <Home /> } />
           <Route path="/signup" element={ <SignUp /> } />
           <Route path="/login" element={<Login />}/>
+          <Route path="/my-envelopes" element={
+            <ProtectedRoute>
+              <MyEnvelopes />
+            </ProtectedRoute>
+          } />
           <Route path="/envelope/:slug" element={ <EnvelopeView preloadFonts={preloadFonts} /> } />
           <Route path="/envelope/new" element={ <EditingView fontOptions={fontOptions} preloadFonts={preloadFonts} /> } />
           <Route path="/envelope/edit/:slug" element={

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function SignUp() {
   const { register } = useAuth();
@@ -8,6 +9,7 @@ export default function SignUp() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await register(username, password);
-      navigate('/envelope/new');
+      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -61,13 +63,23 @@ export default function SignUp() {
             <label className="block text-sm font-medium text-stone-600 mb-1.5">
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="8+ characters"
-              autoComplete="new-password"
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="8+ characters"
+                autoComplete="new-password"
+                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-stone-400 hover:text-stone-700"
+              >
+                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
           </div>
 
           <button

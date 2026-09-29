@@ -51,6 +51,14 @@ const useSidebarPopupSide = () => {
 }
 
 const asBackgroundImage = (url) => url ? `url('${url}')` : ""
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024
+
+const isAllowedImage = (file) => {
+    if (!file || file.size < MAX_IMAGE_SIZE) return true
+
+    window.alert("Please choose an image smaller than 10 MB.")
+    return false
+}
 
 export default function Sidebar ({ onAddText, onAddImage, onAddImageUrl, onUploadBackground, isUploading, isBackgroundUploading, envelopeFabricRef, letterFabricRef, activeCanvas, visibleCanvas, openShareModal, envelopeColor, setEnvelopeColor, letterColor, setLetterColor, background, setBackground }) {
     const fileInputRef = useRef(null)
@@ -128,6 +136,7 @@ export default function Sidebar ({ onAddText, onAddImage, onAddImageUrl, onUploa
                                         </>
                                     )}
                                 </button>
+                                <p className="mt-2 text-center text-xs text-amber-100/70">Images must be smaller than 10 MB</p>
                                 <input
                                     ref={fileInputRef}
                                     type="file"
@@ -135,6 +144,8 @@ export default function Sidebar ({ onAddText, onAddImage, onAddImageUrl, onUploa
                                     disabled={disabled || isUploading}
                                     onChange={async (e) => {
                                         if (disabled) return
+                                        const file = e.target.files?.[0]
+                                        if (!isAllowedImage(file)) return
                                         await onAddImage(e, fabricRef?.current)
                                         setImagePopoverOpen(false)
                                     }}
@@ -220,12 +231,15 @@ export default function Sidebar ({ onAddText, onAddImage, onAddImageUrl, onUploa
                                         </>
                                     )}
                                 </button>
+                                <p className="mt-2 text-center text-xs text-amber-100/70">Images must be smaller than 10 MB</p>
                                 <input
                                     ref={backgroundInputRef}
                                     type="file"
                                     accept="image/*"
                                     disabled={isBackgroundUploading}
-                                    onChange={onUploadBackground}
+                                    onChange={(e) => {
+                                        if (isAllowedImage(e.target.files?.[0])) onUploadBackground(e)
+                                    }}
                                     onClick={e => e.target.value = null}
                                     className="hidden"
                                 />

@@ -1,12 +1,14 @@
 import { createPortal } from "react-dom"
 import { useRef, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function AuthModal({ open, onClose, onSuccess }) {
   const { register, login } = useAuth()
-  const [isLogin, setIsLogin] = useState(false) 
+  const [isLogin, setIsLogin] = useState(true) 
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const usernameRef = useRef()
   const passwordRef = useRef()
@@ -68,13 +70,23 @@ export default function AuthModal({ open, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-medium text-stone-600 mb-1.5">Password</label>
-            <input
-              ref={passwordRef}
-              type="password"
-              placeholder="8+ characters"
-              autoComplete={!isLogin ? "new-password" : "current-password"}
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
-            />
+            <div className="relative">
+              <input
+                ref={passwordRef}
+                type={showPassword ? "text" : "password"}
+                placeholder="8+ characters"
+                autoComplete={!isLogin ? "new-password" : "current-password"}
+                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-300 outline-none focus:border-stone-400 transition-colors"
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-stone-400 hover:text-stone-700"
+              >
+                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -84,7 +96,7 @@ export default function AuthModal({ open, onClose, onSuccess }) {
           >
             {loading
               ? !isLogin ? "Creating account..." : "Logging in..."
-              : !isLogin ? "Create account" : "Log in"
+              : !isLogin ? "Create account" : "Sign in"
             }
           </button>
         </div>
@@ -95,7 +107,7 @@ export default function AuthModal({ open, onClose, onSuccess }) {
             onClick={() => { setIsLogin(!isLogin); setError("") }}
             className="text-stone-700 font-medium hover:underline"
           >
-            {!isLogin ? "Log in" : "Sign up"}
+            {!isLogin ? "Sign in" : "Sign up"}
           </button>
         </p>
 

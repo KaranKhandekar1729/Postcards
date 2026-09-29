@@ -1,7 +1,8 @@
 import { FlipHorizontal } from 'lucide-react'
 import Envelope from '../components/Envelope'
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const DEFAULT_BACKGROUND = "url('https://res.cloudinary.com/docidcbkt/image/upload/v1780292789/postcard-uploads/vwqr5qnzr0juhmipxzao.jpg')"
 
@@ -11,6 +12,10 @@ export default function EnvelopeView({ preloadFonts }) {
     const [letterState, setLetterState] = useState('idle')
     const [envelopeData, setEnvelopeData] = useState(null)
     const {slug} = useParams()
+    const { user } = useAuth()
+
+    const isOwner = user?._id && envelopeData?.author?._id
+        && String(user._id) === String(envelopeData.author._id)
 
     // fetch envelope
     useEffect(() => {
@@ -79,6 +84,14 @@ export default function EnvelopeView({ preloadFonts }) {
 
         { (!isOpen && letterState === 'idle') && (
                 <div className="absolute top-2 right-2 flex gap-3">
+                    {isOwner && (
+                        <Link
+                            to={`/envelope/edit/${slug}`}
+                            className="bg-white flex gap-2 items-center justify-center font-bold text-red-950 hover:bg-red-950 hover:text-white p-2 px-4 rounded-sm cursor-pointer transition-all duration-300"
+                        >
+                            Edit
+                        </Link>
+                    )}
                     <button
                         onClick={handleEnvelopeFlip}
                         className='bg-amber-300 flex gap-4 justify-center hover:bg-red-950 font-bold text-red-950 hover:text-amber-300 p-2 px-4 rounded-sm w-fit lg:w-32 cursor-pointer transition-all duration-300'
